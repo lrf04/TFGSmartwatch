@@ -24,7 +24,7 @@ public class SplashActivity extends AppCompatActivity {
         prefs=getSharedPreferences("Preferences", Context.MODE_PRIVATE);
         Intent intentLogin=new Intent(SplashActivity.this, LoginActivity.class);
         Intent intentMain=new Intent(SplashActivity.this, MenuPrincipal.class);
-        if(!TextUtils.isEmpty(util.getUserNamePrefs(prefs)) && !TextUtils.isEmpty(util.getUserPasswordPrefs(prefs))){
+        if(!TextUtils.isEmpty(util.getUserEmailPrefs(prefs)) && !TextUtils.isEmpty(util.getUserPasswordPrefs(prefs))){
             startActivity(intentMain);
 
         }else{
