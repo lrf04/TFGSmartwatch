@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@color/primary_color"/>
+
+
+    <item
+
+        android:gravity="center"
+        android:drawable="@drawable/cabeza_robot"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"/>
+
+</layer-list>
