@@ -3,6 +3,7 @@ package com.example.tfgsmartwatch.API;
 
 
 import com.example.tfgsmartwatch.models.Alumno;
+import com.example.tfgsmartwatch.models.Subject;
 
 import java.util.List;
 
@@ -17,4 +18,7 @@ public interface ApiService {
 
     @GET("api/students/{id}")
     Call<Alumno> getStudent(@Path("id") int id);
+
+    @GET("api/subjects/{id}")
+    Call<List<Subject>> getPeriods(@Path("id") int id);
 }
