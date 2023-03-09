@@ -24,8 +24,13 @@ import com.example.tfgsmartwatch.utils.util;
 
 import java.io.IOException;
 import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -42,7 +47,12 @@ public class MenuPrincipal extends AppCompatActivity {
     private String name;
     private List<Period> periods;
     private List<List<Period>> periodos=new ArrayList<>();
+    private List<String> nombres=new ArrayList<>();
     private List<String> horas=new ArrayList<>();
+    private List<String> horasAux=new ArrayList<>();
+    private List<String> nuevo=new ArrayList<>();
+    private List<Integer> numeros=new ArrayList<>();
+    private List<String> resultados=new ArrayList<>();
     SharedPreferences prefs;
 
     @Override
@@ -98,14 +108,77 @@ public class MenuPrincipal extends AppCompatActivity {
                         Log.d("name"+i,String.valueOf(subjects.get(i).getName()));
                         periods=subjects.get(i).getPeriods();
                         periodos.add(periods);
+                        nombres.add(subjects.get(i).getName());
                     }
 
+                    /*for(int i=0;i<subjects.size();i++){
+                        nuevo.add(subjects.get(i).getName());
+
+                        for(int u=0;u<6;u++){
+                            subjects.get(i).get(u).
+                        }
+                        for(int j=0;i<periodos.size();j++){
+                                horas.add(periodos.get(i).get(j).getTime());
+                                horas.add(periodos.get(i).get(j).getTimeFinish());
+
+                        }
+
+                    }*/
+
+
                     for(int i=0;i<periodos.size();i++){
-                        for(int j=0;j<periods.size();j++){
+                       int z=periodos.get(i).size();
+                       numeros.add(z);
+                        for(int j=0;j<z;j++){
                             horas.add(periodos.get(i).get(j).getTime());
                             horas.add(periodos.get(i).get(j).getTimeFinish());
                         }
                     }
+
+                    horasAux=horas;
+                    for(int i=0;i<nombres.size();i++){
+                        resultados.add(nombres.get(i));
+                        int z=numeros.get(i);
+                        int v=2*z;
+                        int w=0;
+
+
+                        for(int j=0;j<v;j++){
+                            resultados.add(horasAux.get(j));
+                            /*horasAux.remove(j);*/
+                            w=w+1;
+                            if(w%2==0 && j!=(v-1)){
+                                resultados.add(nombres.get(i));
+                            }
+
+                        }
+                        for(int p=0;p<v;p++){
+                            horasAux.remove(0);
+                        }
+                    }
+
+                   for(int i=0;i<resultados.size();i=i+3){
+                       if(resultados.get(i).equals("lengua")){
+                           /*Intent intent=new Intent(MenuPrincipal.this,Feedback.class);
+                           startActivity(intent);*/
+
+                           DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+                           try {
+                               Date time = dateFormat.parse(resultados.get(i+1));
+                               //java.sql.Time timeValue = new java.sql.Time(dateFormat.parse(resultados.get(i+1)).getTime());
+                           } catch (ParseException e) {
+                               e.printStackTrace();
+                           }
+
+
+
+
+
+                       }
+                   }
+
+
+
 
 
 
