@@ -25,13 +25,11 @@ import com.example.tfgsmartwatch.utils.util;
 import java.io.IOException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import retrofit2.Call;
@@ -40,7 +38,7 @@ import retrofit2.Response;
 
 public class MenuPrincipal extends AppCompatActivity {
     private ActivityMainBinding binding;
-    private Button button;
+    private Button buttonClase, buttonRecreo;
     private EditText hora;
     private Time horaActual;
     private TextView tv1;
@@ -60,6 +58,8 @@ public class MenuPrincipal extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu_principal);
         bindUI();
+        buttonClase.setEnabled(false);
+        buttonRecreo.setEnabled(false);
 
         //SharedPreferences
         prefs = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
@@ -71,7 +71,7 @@ public class MenuPrincipal extends AppCompatActivity {
         Call<Alumno> alumnoCall=service.getStudent(id);
         Call<List<Subject>> periodsCall=service.getPeriods(id);
 
-        /*alumnoCall.enqueue(new Callback<Alumno>() {
+        alumnoCall.enqueue(new Callback<Alumno>() {
             @Override
             public void onResponse(Call<Alumno> call, Response<Alumno> response) {
                 if(response.isSuccessful()){
@@ -96,7 +96,7 @@ public class MenuPrincipal extends AppCompatActivity {
                 }
 
             }
-        });*/
+        });
 
         periodsCall.enqueue(new Callback<List<Subject>>() {
             @Override
@@ -158,21 +158,28 @@ public class MenuPrincipal extends AppCompatActivity {
                     }
 
                    for(int i=0;i<resultados.size();i=i+3){
-                       if(resultados.get(i).equals("lengua")){
-                           /*Intent intent=new Intent(MenuPrincipal.this,Feedback.class);
-                           startActivity(intent);*/
+                       if(!resultados.get(i).equals("recreo")){
 
-                           DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-                           try {
-                               Date time = dateFormat.parse(resultados.get(i+1));
-                               //java.sql.Time timeValue = new java.sql.Time(dateFormat.parse(resultados.get(i+1)).getTime());
-                           } catch (ParseException e) {
-                               e.printStackTrace();
+                           LocalTime timeValue = LocalTime.parse(resultados.get(i+1));
+                           LocalTime timeValue1 = LocalTime.parse(resultados.get(i+2));
+                           LocalTime ahora = LocalTime.now();
+
+                           if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0){
+                               buttonClase.setEnabled(true);
+
+
                            }
 
 
+                       }else{
+                           LocalTime timeValue = LocalTime.parse(resultados.get(i+1));
+                           LocalTime timeValue1 = LocalTime.parse(resultados.get(i+2));
+                           LocalTime ahora = LocalTime.now();
+                           if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0){
+                               buttonRecreo.setEnabled(true);
 
 
+                           }
 
                        }
                    }
@@ -204,7 +211,7 @@ public class MenuPrincipal extends AppCompatActivity {
 
 
         //Prueba-> Botón para ir a la actividad de clase
-        button.setOnClickListener(new View.OnClickListener() {
+        buttonClase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(MenuPrincipal.this, course.class);
@@ -216,8 +223,23 @@ public class MenuPrincipal extends AppCompatActivity {
 
     }
 
+    public static Timestamp convertStringToTimestamp(String str_date, String pattern) {
+        try {
+
+            SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+            Date date = formatter.parse(str_date);
+            java.sql.Timestamp timeStampDate = new Timestamp(date.getTime());
+            return timeStampDate;
+
+        } catch (ParseException e) {
+            System.out.println("Exception :" + e);
+            return null;
+        }
+    }
+
     private void bindUI(){
-        button=(Button) findViewById(R.id.button);
+        buttonClase =(Button) findViewById(R.id.buttonClase);
+        buttonRecreo =(Button) findViewById(R.id.buttonPatio);
         tv1=(TextView) findViewById(R.id.textViewBienvenida);
     }
 
