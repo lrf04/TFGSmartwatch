@@ -214,7 +214,7 @@ public class MenuPrincipal extends AppCompatActivity {
         buttonClase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(MenuPrincipal.this, course.class);
+                Intent intent=new Intent(MenuPrincipal.this, Course.class);
                 startActivity(intent);
             }
         });

@@ -24,7 +24,7 @@
             android:exported="false"
             android:theme="@style/LoginScreen"/>
         <activity
-            android:name=".activities.course"
+            android:name=".activities.Course"
             android:exported="true"
             android:theme="@style/LoginScreen" />
         <activity

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.os.Vibrator;
 
 import com.example.tfgsmartwatch.R;
@@ -30,7 +29,7 @@ public class Feedback extends AppCompatActivity {
 
                 //***Aquí agregamos el proceso a ejecutar.
 
-                Intent intent=new Intent(Feedback.this,course.class);
+                Intent intent=new Intent(Feedback.this, Course.class);
                 startActivity(intent);
 
                 handler.removeCallbacks(null);

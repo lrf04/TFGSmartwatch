@@ -2,7 +2,10 @@ package com.example.tfgsmartwatch.API;
 
 
 
+import android.content.res.Configuration;
+
 import com.example.tfgsmartwatch.models.Alumno;
+import com.example.tfgsmartwatch.models.ConfigurationStudent;
 import com.example.tfgsmartwatch.models.Subject;
 
 import java.util.List;
@@ -21,4 +24,7 @@ public interface ApiService {
 
     @GET("api/subjects/{id}")
     Call<List<Subject>> getPeriods(@Path("id") int id);
+
+    @GET("api/configurations/{id}")
+    Call<ConfigurationStudent> getConfiguration(@Path("id") int id);
 }
