@@ -7,6 +7,6 @@ public class MyApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        SystemClock.sleep(3000);
+        SystemClock.sleep(5000);
     }
 }

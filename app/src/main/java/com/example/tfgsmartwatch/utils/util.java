@@ -15,7 +15,7 @@ public class util {
     }
     public static void removeSharedPreferences(SharedPreferences preferences){
         SharedPreferences.Editor editor=preferences.edit();
-        editor.remove("name");
+        editor.remove("email");
         editor.remove("password");
         editor.remove("id");
         editor.apply();

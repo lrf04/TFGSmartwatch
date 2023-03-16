@@ -7,8 +7,9 @@
     <item
 
         android:gravity="center"
-        android:drawable="@drawable/cabeza_robot"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"/>
+        android:height="150dp"
+        android:width="150dp"
+        android:drawable="@drawable/cabeza_robot"/>
+
 
 </layer-list>

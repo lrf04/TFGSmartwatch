@@ -15,6 +15,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.tfgsmartwatch.R;
+import com.example.tfgsmartwatch.utils.util;
 
 import java.util.regex.Pattern;
 
@@ -31,7 +32,7 @@ public class LoginActivity extends AppCompatActivity {
 
         bindUI();
         prefs=getSharedPreferences("Preferences", Context.MODE_PRIVATE);
-        /*setCredentialsIfExist();*/
+        setCredentialsIfExist();
 
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -40,8 +41,8 @@ public class LoginActivity extends AppCompatActivity {
                 String password=editTextPassword.getText().toString();
                 String id=editTextId.getText().toString();
                 if(login(email,password)){
-                    goToMain();
                     saveOnPreferences(email,password,id);
+                    goToMain();
                 }
             }
         });
@@ -76,27 +77,32 @@ public class LoginActivity extends AppCompatActivity {
         return password.length()>=4;
     }
 
-    private void saveOnPreferences(String name,String password,String id){
+    private void saveOnPreferences(String email,String password,String id){
 
             //Hay que crear este porque el otro que creamos era solo de lectura
             SharedPreferences.Editor editor=prefs.edit();
-            editor.putString("name",name);
+            editor.putString("email",email);
             editor.putString("password",password);
             editor.putString("id",id);
             editor.apply();
 
     }
 
-    /*private void setCredentialsIfExist(){
-        String name= util.getUserNamePrefs(prefs);
-        String password=util.getUserPasswordPrefs(prefs);
-        if(!TextUtils.isEmpty(name) && !TextUtils.isEmpty(password)){
-            editTextEmail.setText(name);
+    private void setCredentialsIfExist(){
+        String email= util.getUserEmailPrefs(prefs);
+        String password= util.getUserPasswordPrefs(prefs);
+        String id=util.getUserIdPrefs(prefs);
+        /*Toast.makeText(this, "Email:"+email, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Password:"+password, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Id:"+id, Toast.LENGTH_SHORT).show();*/
+
+        if(!TextUtils.isEmpty(email) && !TextUtils.isEmpty(password) && !TextUtils.isEmpty(id)){
+            editTextEmail.setText(email);
             editTextPassword.setText(password);
-            switchRecordar.setChecked(true);
+            editTextId.setText(id);
 
         }
-    }*/
+    }
 
     private void goToMain(){
         Intent intent=new Intent(LoginActivity.this, MenuPrincipal.class);
