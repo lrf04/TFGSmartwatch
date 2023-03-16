@@ -27,10 +27,14 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -42,7 +46,7 @@ public class MenuPrincipal extends AppCompatActivity {
     private EditText hora;
     private Time horaActual;
     private TextView tv1;
-    private String name;
+    private String name,dayName,diaActual;
     private List<Period> periods;
     private List<List<Period>> periodos=new ArrayList<>();
     private List<String> nombres=new ArrayList<>();
@@ -111,22 +115,10 @@ public class MenuPrincipal extends AppCompatActivity {
                         nombres.add(subjects.get(i).getName());
                     }
 
-                    /*for(int i=0;i<subjects.size();i++){
-                        nuevo.add(subjects.get(i).getName());
-
-                        for(int u=0;u<6;u++){
-                            subjects.get(i).get(u).
-                        }
-                        for(int j=0;i<periodos.size();j++){
-                                horas.add(periodos.get(i).get(j).getTime());
-                                horas.add(periodos.get(i).get(j).getTimeFinish());
-
-                        }
-
-                    }*/
 
 
-                    for(int i=0;i<periodos.size();i++){
+                    //Funciona (versión sin día)
+                    /*for(int i=0;i<periodos.size();i++){
                        int z=periodos.get(i).size();
                        numeros.add(z);
                         for(int j=0;j<z;j++){
@@ -145,7 +137,7 @@ public class MenuPrincipal extends AppCompatActivity {
 
                         for(int j=0;j<v;j++){
                             resultados.add(horasAux.get(j));
-                            /*horasAux.remove(j);*/
+
                             w=w+1;
                             if(w%2==0 && j!=(v-1)){
                                 resultados.add(nombres.get(i));
@@ -155,16 +147,84 @@ public class MenuPrincipal extends AppCompatActivity {
                         for(int p=0;p<v;p++){
                             horasAux.remove(0);
                         }
+                    }*/
+
+                    for(int i=0;i<periodos.size();i++){
+                        int z=periodos.get(i).size();
+                        numeros.add(z);
+                        for(int j=0;j<z;j++){
+                            horas.add(periodos.get(i).get(j).getDay());
+                            horas.add(periodos.get(i).get(j).getTime());
+                            horas.add(periodos.get(i).get(j).getTimeFinish());
+                        }
                     }
 
-                   for(int i=0;i<resultados.size();i=i+3){
+                    horasAux=horas;
+                    for(int i=0;i<nombres.size();i++){
+                        resultados.add(nombres.get(i));
+                        int z=numeros.get(i);
+                        int v=3*z;
+                        int w=0;
+
+
+                        for(int j=0;j<v;j++){
+                            resultados.add(horasAux.get(j));
+
+                            w=w+1;
+                            if(w%3==0 && j!=(v-1)){
+                                resultados.add(nombres.get(i));
+                            }
+
+                        }
+                        for(int p=0;p<v;p++){
+                            horasAux.remove(0);
+                        }
+                    }
+                    if(resultados.isEmpty()){
+
+                    }
+
+
+
+
+                   for(int i=0;i<resultados.size();i=i+4){
                        if(!resultados.get(i).equals("recreo")){
 
-                           LocalTime timeValue = LocalTime.parse(resultados.get(i+1));
-                           LocalTime timeValue1 = LocalTime.parse(resultados.get(i+2));
+                           diaActual=resultados.get(i+1);
+                           LocalTime timeValue = LocalTime.parse(resultados.get(i+2));
+                           LocalTime timeValue1 = LocalTime.parse(resultados.get(i+3));
                            LocalTime ahora = LocalTime.now();
 
-                           if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0){
+                           /*LocalDate date = LocalDate.now();
+                           DayOfWeek dow = date.getDayOfWeek();
+                           String dayName = dow.getDisplayName(TextStyle.FULL, Locale.ENGLISH);*/
+                           dayName=LocalDate.now().getDayOfWeek().name();
+
+                           switch (dayName){
+                               case "MONDAY":
+                                   dayName="lunes";
+                                   break;
+                               case "TUESDAY":
+                                   dayName="martes";
+                                   break;
+                               case "WEDNESDAY":
+                                   dayName="miércoles";
+                                   break;
+                               case "THURSDAY":
+                                   dayName="jueves";
+                                   break;
+                               case "FRIDAY":
+                                   dayName="viernes";
+                                   break;
+                               case "SATURDAY":
+                                   dayName="sábado";
+                                   break;
+                               case "SUNDAY":
+                                   dayName="domingo";
+                                   break;
+                           }
+
+                           if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0 && dayName.equals(diaActual)){
                                buttonClase.setEnabled(true);
 
 
@@ -172,10 +232,10 @@ public class MenuPrincipal extends AppCompatActivity {
 
 
                        }else{
-                           LocalTime timeValue = LocalTime.parse(resultados.get(i+1));
-                           LocalTime timeValue1 = LocalTime.parse(resultados.get(i+2));
+                           LocalTime timeValue = LocalTime.parse(resultados.get(i+2));
+                           LocalTime timeValue1 = LocalTime.parse(resultados.get(i+3));
                            LocalTime ahora = LocalTime.now();
-                           if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0){
+                           if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0 && dayName.equals(diaActual) ){
                                buttonRecreo.setEnabled(true);
 
 

@@ -74,7 +74,7 @@ public class Course extends AppCompatActivity {
             public void onResponse(Call<ConfigurationStudent> call, Response<ConfigurationStudent> response) {
                 if(response.isSuccessful()){
                     ConfigurationStudent configuration=response.body();
-                    Toast.makeText(Course.this, "El servidor retornó datos", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(Course.this, "El servidor retornó datos", Toast.LENGTH_SHORT).show();
 
                     //Asignación de parámetros
                     higherHeartRate=configuration.getHigherHeartRate();
@@ -197,13 +197,13 @@ public class Course extends AppCompatActivity {
                 startActivity(intent);
             }
             //2.Ritmo cardiaco alto
-            else if(currentHeartRate>higherHeartRate){
+            /*else if(currentHeartRate>higherHeartRate){
                 comprobar(higherRateMessage);
 
                 Intent intent=new Intent(Course.this,Feedback.class);
                 intent.putExtra("datos",higherRateMessage);
                 startActivity(intent);
-            }
+            }*/
 
 
         }
@@ -230,7 +230,7 @@ public class Course extends AppCompatActivity {
             pb.setProgress((int)changeInAcceleration);
 
             //3.Ritmo y movimiento altos
-            if(currentHeartRate>higherHeartRate && changeInAcceleration>14){
+            /*if(currentHeartRate>higherHeartRate && changeInAcceleration>14){
                 comprobar(higherRateMovementMessage);
 
 
@@ -239,35 +239,35 @@ public class Course extends AppCompatActivity {
                 startActivity(intent);
 
 
-            }
+            }*/
             //4.Ritmo y movimiento bajos
-            else if(currentHeartRate<higherHeartRate && changeInAcceleration==0){
+            /*else if(currentHeartRate<higherHeartRate && changeInAcceleration==0){
                 comprobar(lowerMovementMessage);
 
                 Intent intent=new Intent(Course.this,Feedback.class);
                 intent.putExtra("datos",lowerMovementMessage);
                 startActivity(intent);
-            }
+            }*/
             //5.Ritmo alto y movimiento bajo
-            else if(currentHeartRate>higherHeartRate && changeInAcceleration==0){
+            /*else if(currentHeartRate>higherHeartRate && changeInAcceleration==0){
                 comprobar(higherRateLowerMovementMessage);
 
                 Intent intent=new Intent(Course.this,Feedback.class);
                 intent.putExtra("datos",higherRateLowerMovementMessage);
                 startActivity(intent);
 
-            }
+            }*/
             //6.Ritmo bajo y movimiento alto
-            else if(currentHeartRate<lowerHeartRate && changeInAcceleration>14){
+            /*else if(currentHeartRate<lowerHeartRate && changeInAcceleration>14){
                 comprobar(lowerRateHigherMovementMessage);
 
                 Intent intent=new Intent(Course.this,Feedback.class);
                 intent.putExtra("datos",lowerRateHigherMovementMessage);
                 startActivity(intent);
 
-            }
+            }*/
             //7.Movimiento alto
-            else if(changeInAcceleration>14){
+            /*else if(changeInAcceleration>14){
                 textViewDifference.setBackgroundColor(Color.BLUE);
                 comprobar(higherMovementMessage);
 
@@ -277,33 +277,33 @@ public class Course extends AppCompatActivity {
                 intent.putExtra("datos",higherMovementMessage);
                 startActivity(intent);
 
-            }
+            }*/
             //8.Movimiento bajo
-            else if(changeInAcceleration<5){
+            /*else if(changeInAcceleration<5){
                 comprobar(lowerMovementMessage);
 
                 Intent intent=new Intent(Course.this,Feedback.class);
                 intent.putExtra("datos",lowerMovementMessage);
                 startActivity(intent);
 
-            }
+            }*/
             //9.Sin movimiento
-            else if(changeInAcceleration==0){
+            /*else if(changeInAcceleration==0){
                 comprobar(noMovementMessage);
 
                 Intent intent=new Intent(Course.this,Feedback.class);
                 intent.putExtra("datos",noMovementMessage);
                 startActivity(intent);
 
-            }
+            }*/
 
 
-            else if(changeInAcceleration>5){
+            /*else if(changeInAcceleration>5){
                 textViewDifference.setBackgroundColor(Color.RED);
             }
             else{
                 textViewDifference.setBackgroundColor(Color.YELLOW);
-            }
+            }*/
 
         }
 
