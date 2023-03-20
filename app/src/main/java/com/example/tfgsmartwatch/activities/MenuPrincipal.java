@@ -16,7 +16,6 @@ import android.widget.Toast;
 import com.example.tfgsmartwatch.API.Api;
 import com.example.tfgsmartwatch.API.ApiService;
 import com.example.tfgsmartwatch.R;
-import com.example.tfgsmartwatch.databinding.ActivityMainBinding;
 import com.example.tfgsmartwatch.models.Alumno;
 import com.example.tfgsmartwatch.models.Period;
 import com.example.tfgsmartwatch.models.Subject;
@@ -41,7 +40,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MenuPrincipal extends AppCompatActivity {
-    private ActivityMainBinding binding;
+
     private Button buttonClase, buttonRecreo;
     private EditText hora;
     private Time horaActual;
@@ -54,7 +53,7 @@ public class MenuPrincipal extends AppCompatActivity {
     private List<String> horasAux=new ArrayList<>();
     private List<String> nuevo=new ArrayList<>();
     private List<Integer> numeros=new ArrayList<>();
-    private List<String> resultados=new ArrayList<>();
+    public ArrayList<String> resultados=new ArrayList<>();
     SharedPreferences prefs;
 
     @Override
@@ -80,7 +79,7 @@ public class MenuPrincipal extends AppCompatActivity {
             public void onResponse(Call<Alumno> call, Response<Alumno> response) {
                 if(response.isSuccessful()){
                     Alumno alumno=response.body();
-                   // Toast.makeText(MenuPrincipal.this, "El servidor retornó datos", Toast.LENGTH_SHORT).show();
+                   /*Toast.makeText(MenuPrincipal.this, "El servidor retornó datos", Toast.LENGTH_SHORT).show();*/
 
                     tv1.setText("Bienvenido "+alumno.getName());
 
@@ -180,9 +179,8 @@ public class MenuPrincipal extends AppCompatActivity {
                             horasAux.remove(0);
                         }
                     }
-                    if(resultados.isEmpty()){
 
-                    }
+
 
 
 
@@ -275,6 +273,7 @@ public class MenuPrincipal extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(MenuPrincipal.this, Course.class);
+                intent.putStringArrayListExtra("resultados",resultados);
                 startActivity(intent);
 
             }

@@ -26,30 +26,38 @@ import com.example.tfgsmartwatch.models.Alumno;
 import com.example.tfgsmartwatch.models.ConfigurationStudent;
 import com.example.tfgsmartwatch.utils.util;
 
+import org.w3c.dom.Text;
+
 import java.io.IOException;
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class Course extends AppCompatActivity {
-    private TextView textViewTime,textViewScore,textViewDifference,textViewCurrent,textViewPrevious;
+    private TextView textViewTime,textViewScore,textViewDifference,textViewCurrent,textViewPrevious,textViewPuntuacion;
     private ProgressBar pb;
 
-    private int puntuacion=0;
+    public volatile int puntuacion;
+    public int higherRateCont,lowerRateCont,higherMovementCont,lowerMovementCont,noMovementCont,higherRateMovementCont,lowerRateMovementCont,higherRateLowerMovementCont,lowerRateHigherMovementCont;
+    public int totalNervioso,vecesCalmado,vecesNoCalmado,hola;
+
     private static final int CODE_GPS = 0, CODE_SENSOR = 1;
 
     private SensorManager sensorManagerHeartRate,sensorManagerAccelerometer;
     private Sensor sensorRitmoCardiaco,sensorAcelerometer;
 
+    public int movementTimeThread;
     private int higherHeartRate,lowerHeartRate,movementTime,movementPercentage,noMovementTime,noMovementPercentage;
     private String higherRateMessage,lowerRateMessage,lowerMovementMessage,higherMovementMessage,higherRateLowerMovementMessage,lowerRateHigherMovementMessage,higherRateMovementMessage,lowerRateMovementMessage,noMovementMessage;
     public float currentHeartRate;
     public double accelerationCurrentValue,accelerationPreviousValue,changeInAcceleration;
+    public ArrayList<String> resultados=new ArrayList<>();
+
 
 
     SharedPreferences prefs;
-
 
 
     @Override
@@ -57,8 +65,15 @@ public class Course extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course);
 
+        Bundle parametros = this.getIntent().getExtras();
+        if(parametros !=null){
+           resultados=getIntent().getExtras().getStringArrayList("resultados");
+
+        }
 
         bindUI();
+
+        /*textViewPuntuacion.setText("Puntuacion= "+puntuacion);*/
 
         //SharedPreferences
         prefs = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
@@ -74,7 +89,7 @@ public class Course extends AppCompatActivity {
             public void onResponse(Call<ConfigurationStudent> call, Response<ConfigurationStudent> response) {
                 if(response.isSuccessful()){
                     ConfigurationStudent configuration=response.body();
-                    //Toast.makeText(Course.this, "El servidor retornó datos", Toast.LENGTH_SHORT).show();
+                    /*Toast.makeText(Course.this, "El servidor retornó datos", Toast.LENGTH_SHORT).show();*/
 
                     //Asignación de parámetros
                     higherHeartRate=configuration.getHigherHeartRate();
@@ -95,10 +110,6 @@ public class Course extends AppCompatActivity {
                     higherRateLowerMovementMessage=configuration.getHigherRateLowerMovement();
                     lowerRateHigherMovementMessage=configuration.getLowerRateHigherMovement();
 
-
-
-
-
                 }else{
                     Toast.makeText(Course.this, "El servidor retornó un error", Toast.LENGTH_SHORT).show();
                 }
@@ -117,7 +128,43 @@ public class Course extends AppCompatActivity {
             }
         });
 
+//********************************************************************************************************************************
+//********************************************************************************************************************************
 
+        //Hilo que se repite cada minuto.
+        class Hilo1 extends Thread {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(30000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                Toast.makeText(Course.this, "Puntuacion="+puntuacion, Toast.LENGTH_SHORT).show();
+                                double changeInAcceleration1=changeInAcceleration;
+                                float currentHeartRate1=currentHeartRate;
+
+
+                                situaciones(changeInAcceleration1,currentHeartRate1);
+
+
+
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        /*movementTimeThread=movementTime*60000;*/
+        movementTimeThread=20000;
+
+//********************************************************************************************************************************
+//********************************************************************************************************************************
         //Permisos
         if(ContextCompat.checkSelfPermission(Course.this, android.Manifest.permission.BODY_SENSORS) != PackageManager.PERMISSION_GRANTED){
             String[] permissions=new String[1];
@@ -127,22 +174,29 @@ public class Course extends AppCompatActivity {
         }else{
             showHeartRate();
             showAcceleration();
+
+            /*hilo.start();*/
+            new Hilo1().start();
+
         }
+    }//Fin onCreate
 
+//********************************************************************************************************************************
+//********************************************************************************************************************************
 
-
-
-    }
 
     private void bindUI(){
         textViewScore=(TextView) findViewById(R.id.textViewRitmo);
         textViewDifference=(TextView) findViewById(R.id.textViewDifference);
         textViewCurrent=(TextView) findViewById(R.id.textViewCurrent);
         textViewPrevious=(TextView) findViewById(R.id.textViewPrevious);
+        textViewPuntuacion=(TextView) findViewById(R.id.textViewPuntuacion);
         pb=(ProgressBar) findViewById(R.id.progressBar);
 
 
     }
+
+
     private void showHeartRate() {
         sensorManagerHeartRate = (SensorManager) getSystemService(this.SENSOR_SERVICE);
 
@@ -165,7 +219,9 @@ public class Course extends AppCompatActivity {
 
         if (requestCode == CODE_SENSOR) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                showHeartRate();
+                /*showHeartRate();*/
+                /*hilo.start();*/
+
             } else {
                 Toast.makeText(Course.this, "PERMISSION FOR HEART RATE SENSOR NOT GRANTED", Toast.LENGTH_LONG).show();
             }
@@ -181,30 +237,12 @@ public class Course extends AppCompatActivity {
         }
     }
 
+    //Sensor ritmo cardiaco
     SensorEventListener listenerHeartRate = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
             currentHeartRate = sensorEvent.values[0];
             textViewScore.setText("Actual: "+currentHeartRate);
-
-            //1.Ritmo cardiaco bajo
-            if(currentHeartRate<lowerHeartRate){
-                comprobar(lowerRateMessage);
-
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",lowerRateMessage);
-                startActivity(intent);
-            }
-            //2.Ritmo cardiaco alto
-            /*else if(currentHeartRate>higherHeartRate){
-                comprobar(higherRateMessage);
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",higherRateMessage);
-                startActivity(intent);
-            }*/
-
 
         }
 
@@ -213,6 +251,8 @@ public class Course extends AppCompatActivity {
 
         }
     };
+
+    //Acelerómetro
     SensorEventListener listenerAcelerometer=new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -229,81 +269,6 @@ public class Course extends AppCompatActivity {
             textViewPrevious.setText("Previa= "+(int)accelerationPreviousValue);
             pb.setProgress((int)changeInAcceleration);
 
-            //3.Ritmo y movimiento altos
-            /*if(currentHeartRate>higherHeartRate && changeInAcceleration>14){
-                comprobar(higherRateMovementMessage);
-
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",higherRateMovementMessage);
-                startActivity(intent);
-
-
-            }*/
-            //4.Ritmo y movimiento bajos
-            /*else if(currentHeartRate<higherHeartRate && changeInAcceleration==0){
-                comprobar(lowerMovementMessage);
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",lowerMovementMessage);
-                startActivity(intent);
-            }*/
-            //5.Ritmo alto y movimiento bajo
-            /*else if(currentHeartRate>higherHeartRate && changeInAcceleration==0){
-                comprobar(higherRateLowerMovementMessage);
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",higherRateLowerMovementMessage);
-                startActivity(intent);
-
-            }*/
-            //6.Ritmo bajo y movimiento alto
-            /*else if(currentHeartRate<lowerHeartRate && changeInAcceleration>14){
-                comprobar(lowerRateHigherMovementMessage);
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",lowerRateHigherMovementMessage);
-                startActivity(intent);
-
-            }*/
-            //7.Movimiento alto
-            /*else if(changeInAcceleration>14){
-                textViewDifference.setBackgroundColor(Color.BLUE);
-                comprobar(higherMovementMessage);
-
-
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",higherMovementMessage);
-                startActivity(intent);
-
-            }*/
-            //8.Movimiento bajo
-            /*else if(changeInAcceleration<5){
-                comprobar(lowerMovementMessage);
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",lowerMovementMessage);
-                startActivity(intent);
-
-            }*/
-            //9.Sin movimiento
-            /*else if(changeInAcceleration==0){
-                comprobar(noMovementMessage);
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",noMovementMessage);
-                startActivity(intent);
-
-            }*/
-
-
-            /*else if(changeInAcceleration>5){
-                textViewDifference.setBackgroundColor(Color.RED);
-            }
-            else{
-                textViewDifference.setBackgroundColor(Color.YELLOW);
-            }*/
 
         }
 
@@ -313,15 +278,19 @@ public class Course extends AppCompatActivity {
         }
     };
 
+
+
     public boolean tranquilo(float currentHeartRate,int higherHeartRate,int lowerHeartRate,double changeInAcceleration){
-        if(currentHeartRate>lowerHeartRate && currentHeartRate<higherHeartRate &&changeInAcceleration<14){
+        if(/*currentHeartRate>lowerHeartRate && */currentHeartRate<higherHeartRate &&changeInAcceleration<14){
             return true;
         }else{
             return false;
         }
     }
 
-    public void comprobar(String mensaje){
+
+
+    public void comprobar(){
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -329,20 +298,175 @@ public class Course extends AppCompatActivity {
 
                 //***Aquí agregamos el proceso a ejecutar.
                 if(tranquilo(currentHeartRate,higherHeartRate,lowerHeartRate,changeInAcceleration)){
-                    Toast.makeText(Course.this, "El niño está calmado", Toast.LENGTH_LONG).show();
-                }else{
-                    Intent intent=new Intent(Course.this,Feedback.class);
-                    intent.putExtra("datos",mensaje);
-                    startActivity(intent);
+                    vecesCalmado=vecesCalmado+1;
+                    puntuacion=puntuacion+1;
 
-
+                }else {
+                    vecesNoCalmado = vecesNoCalmado + 1;
                 }
-
-
-
                 handler.removeCallbacks(null);
             }
-        }, movementTime*60000 );//define el tiempo.
+        }, 10000 );//define el tiempo.
+    }
+
+    /*class Hilo2 extends Thread {
+        @Override
+        public void run() {
+                try {
+                    Thread.sleep(10000);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(tranquilo(currentHeartRate,higherHeartRate,lowerHeartRate,changeInAcceleration)){
+                                vecesCalmado=vecesCalmado+1;
+                                puntuacion=puntuacion+1;
+
+                            }else {
+                                vecesNoCalmado = vecesNoCalmado + 1;
+                            }
+
+
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+        }
+    }*/
+
+
+    public void situaciones(double movement,float rate){
+
+            //1.Ritmo alto y movimiento bajo
+            /*if(currentHeartRate>higherHeartRate && changeInAcceleration==0){
+                totalNervioso=totalNervioso+1;
+                higherRateLowerMovementCont=higherRateLowerMovementCont+1;
+
+                new Hilo2().start();
+
+                Intent intent=new Intent(Course.this,Feedback.class);
+                intent.putExtra("datos",higherRateLowerMovementMessage);
+                startActivity(intent);
+
+            }*/
+
+            //2.Ritmo bajo y movimiento alto
+            /*else if(currentHeartRate<lowerHeartRate && changeInAcceleration>14){
+                totalNervioso=totalNervioso+1;
+                lowerRateHigherMovementCont=lowerRateHigherMovementCont+1;
+
+                new Hilo2().start();
+
+                Intent intent=new Intent(Course.this,Feedback.class);
+                intent.putExtra("datos",lowerRateHigherMovementMessage);
+                startActivity(intent);
+
+            }*/
+
+
+            //3.Ritmo y movimiento altos
+            /*else if(currentHeartRate>higherHeartRate && changeInAcceleration>14){
+                totalNervioso=totalNervioso+1;
+                higherRateMovementCont=higherRateMovementCont+1;
+
+                new Hilo2().start();
+
+
+                Intent intent=new Intent(Course.this,Feedback.class);
+                intent.putExtra("datos",higherRateMovementMessage);
+                startActivity(intent);
+            }*/
+            //4.Ritmo y movimiento bajos
+            /*else if(currentHeartRate<lowerHeartRate && changeInAcceleration==0){
+                totalNervioso=totalNervioso+1;
+                lowerRateMovementCont=lowerRateMovementCont+1;
+
+                new Hilo2().start();
+
+                Intent intent=new Intent(Course.this,Feedback.class);
+                intent.putExtra("datos",lowerMovementMessage);
+                startActivity(intent);
+            }*/
+
+
+            //5.Movimiento alto
+            if(movement>=2){
+                totalNervioso=totalNervioso+1;
+                higherMovementCont=higherMovementCont+1;
+
+                textViewDifference.setBackgroundColor(Color.BLUE);
+
+                Intent intent=new Intent(Course.this,Feedback.class);
+                intent.putExtra("datos",higherMovementMessage);
+                startActivity(intent);
+
+                comprobar();
+
+
+
+                /*new Hilo2().start();*/
+
+            }
+
+            //6.Ritmo cardiaco alto
+            /*else if(currentHeartRate>higherHeartRate){
+                totalNervioso=totalNervioso+1;
+                higherRateCont=higherRateCont+1;
+
+                new Hilo2().start();
+
+                Intent intent=new Intent(Course.this,Feedback.class);
+                intent.putExtra("datos",higherRateMessage);
+                startActivity(intent);
+            }*/
+
+            //7.Ritmo cardiaco bajo
+            /*else if(currentHeartRate<lowerHeartRate){
+                totalNervioso=totalNervioso+1;
+                lowerRateCont=lowerRateCont+1;
+
+                new Hilo2().start();
+
+
+                Intent intent=new Intent(Course.this,Feedback.class);
+                intent.putExtra("datos",lowerRateMessage);
+                startActivity(intent);
+            }*/
+
+            //8.Movimiento bajo
+           /* else if(changeInAcceleration<5){
+                totalNervioso=totalNervioso+1;
+                lowerMovementCont=lowerMovementCont+1;
+
+                new Hilo2().start();
+
+                Intent intent=new Intent(Course.this,Feedback.class);
+                intent.putExtra("datos",lowerMovementMessage);
+                startActivity(intent);
+
+            }*/
+            //9.Sin movimiento
+           /* else if(changeInAcceleration==0){
+                totalNervioso=totalNervioso+1;
+                noMovementCont=noMovementCont+1;
+
+                new Hilo2().start();
+
+                Intent intent=new Intent(Course.this,Feedback.class);
+                intent.putExtra("datos",noMovementMessage);
+                startActivity(intent);
+
+            }*/
+
+
+            else if(changeInAcceleration>5){
+                textViewDifference.setBackgroundColor(Color.GREEN);
+            }
+            else{
+                textViewDifference.setBackgroundColor(Color.YELLOW);
+            }
+
     }
 
 
