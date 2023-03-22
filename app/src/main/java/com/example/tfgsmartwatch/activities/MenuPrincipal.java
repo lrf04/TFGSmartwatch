@@ -26,14 +26,12 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -54,6 +52,11 @@ public class MenuPrincipal extends AppCompatActivity {
     private List<String> nuevo=new ArrayList<>();
     private List<Integer> numeros=new ArrayList<>();
     public ArrayList<String> resultados=new ArrayList<>();
+    public ArrayList<ArrayList<String>> resultadosNuevos=new ArrayList<>();
+    public ArrayList<ArrayList<String>> resultadosNuevosDia=new ArrayList<>();
+    public ArrayList<ArrayList<String>> ejemplo=new ArrayList<>();
+    public ArrayList<ArrayList<String>> aux1=new ArrayList<>();
+    public ArrayList<String> aux=new ArrayList<>();
     SharedPreferences prefs;
 
     @Override
@@ -183,9 +186,83 @@ public class MenuPrincipal extends AppCompatActivity {
 
 
 
+                    resultadosNuevos=split(4,resultados);
+
+                    /*ejemplo=ordenar(resultadosNuevos);
+                    if(ejemplo.isEmpty()){
+
+                    }*/
 
 
-                   for(int i=0;i<resultados.size();i=i+4){
+
+
+                    for(int i=0;i<resultadosNuevos.size();i++){
+                        for(int j=0;j<4;j=j+4){
+                            if(!resultadosNuevos.get(i).get(j).equals("recreo")){
+                                diaActual=resultadosNuevos.get(i).get(j+1);
+                                LocalTime timeValue = LocalTime.parse(resultadosNuevos.get(i).get(j+2));
+                                LocalTime timeValue1 = LocalTime.parse(resultadosNuevos.get(i).get(j+3));
+                                LocalTime ahora = LocalTime.now();
+
+                                dayName=LocalDate.now().getDayOfWeek().name();
+
+                                switch (dayName){
+                                    case "MONDAY":
+                                        dayName="lunes";
+                                        break;
+                                    case "TUESDAY":
+                                        dayName="martes";
+                                        break;
+                                    case "WEDNESDAY":
+                                        dayName="miercoles";
+                                        break;
+                                    case "THURSDAY":
+                                        dayName="jueves";
+                                        break;
+                                    case "FRIDAY":
+                                        dayName="viernes";
+                                        break;
+                                    case "SATURDAY":
+                                        dayName="sábado";
+                                        break;
+                                    case "SUNDAY":
+                                        dayName="domingo";
+                                        break;
+                                }
+                                if(dayName.equals(diaActual)){
+                                    resultadosNuevosDia.add(resultadosNuevos.get(i));
+                                }
+
+                                if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0 && dayName.equals(diaActual)){
+
+                                    buttonClase.setEnabled(true);
+
+                                }
+
+
+                            }else{
+                                LocalTime timeValue = LocalTime.parse(resultadosNuevos.get(i).get(j+2));
+                                LocalTime timeValue1 = LocalTime.parse(resultadosNuevos.get(i).get(j+3));
+                                LocalTime ahora = LocalTime.now();
+
+                                dayName=LocalDate.now().getDayOfWeek().name();
+
+                                if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0 && dayName.equals(diaActual) ){
+                                    buttonRecreo.setEnabled(true);
+
+
+                                }
+
+                            }
+                        }
+                    }
+
+
+
+
+
+                    //Para array de string
+                   /*for(int i=0;i<resultados.size();i=i+4){
                        if(!resultados.get(i).equals("recreo")){
 
                            diaActual=resultados.get(i+1);
@@ -193,9 +270,9 @@ public class MenuPrincipal extends AppCompatActivity {
                            LocalTime timeValue1 = LocalTime.parse(resultados.get(i+3));
                            LocalTime ahora = LocalTime.now();
 
-                           /*LocalDate date = LocalDate.now();
+                           *//*LocalDate date = LocalDate.now();
                            DayOfWeek dow = date.getDayOfWeek();
-                           String dayName = dow.getDisplayName(TextStyle.FULL, Locale.ENGLISH);*/
+                           String dayName = dow.getDisplayName(TextStyle.FULL, Locale.ENGLISH);*//*
                            dayName=LocalDate.now().getDayOfWeek().name();
 
                            switch (dayName){
@@ -226,6 +303,10 @@ public class MenuPrincipal extends AppCompatActivity {
                                buttonClase.setEnabled(true);
 
 
+
+
+
+
                            }
 
 
@@ -240,7 +321,7 @@ public class MenuPrincipal extends AppCompatActivity {
                            }
 
                        }
-                   }
+                   }*/
 
 
 
@@ -272,6 +353,9 @@ public class MenuPrincipal extends AppCompatActivity {
         buttonClase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
+
                 Intent intent=new Intent(MenuPrincipal.this, Course.class);
                 intent.putStringArrayListExtra("resultados",resultados);
                 startActivity(intent);
@@ -282,6 +366,60 @@ public class MenuPrincipal extends AppCompatActivity {
 
 
     }
+
+    public static ArrayList<ArrayList<String>> split(int numberOfElements, ArrayList<String> sentences) {
+        ArrayList<ArrayList<String>> lists = new ArrayList<ArrayList<String>>();
+        int index = 0;
+        for (String sentence : sentences) {
+            if (index % numberOfElements == 0) {
+                lists.add(new ArrayList<String>());
+            }
+            lists.get(index / numberOfElements).add(sentences.get(index));
+            index++;
+        }
+        return lists;
+    }
+
+    public int menor(ArrayList<ArrayList<String>> array){
+        int posicion=0;
+        ArrayList<String> menor;
+        menor=array.get(0);
+
+        LocalTime timeValue = LocalTime.parse(menor.get(2));
+        /*for(int i=0;i<resultadosNuevos.size();i++){*/
+        for(int i=0;i<array.size();i++){
+            for(int j=0;j<4;j=j+4) {
+                LocalTime timeValue1 = LocalTime.parse(array.get(i).get(j+2));
+                LocalTime ahora = LocalTime.now();
+
+
+                    if(timeValue1.compareTo(timeValue)<0){
+                        posicion=i;
+                        timeValue = LocalTime.parse(array.get(i).get(j+2));
+
+                    }
+
+            }
+
+        }
+        return posicion;
+    }
+
+
+    public ArrayList<ArrayList<String>> ordenar(ArrayList<ArrayList<String>> array){
+        ArrayList<ArrayList<String>> aux= new ArrayList<>(array);
+        ArrayList<ArrayList<String>> aux1= new ArrayList<>();
+        int posicion;
+
+        for(int i=0;i<aux.size();i++){
+                posicion=menor(array);
+                aux1.add(array.get(posicion));
+                array.remove(posicion);
+        }
+        return aux1;
+    }
+
+
 
     public static Timestamp convertStringToTimestamp(String str_date, String pattern) {
         try {

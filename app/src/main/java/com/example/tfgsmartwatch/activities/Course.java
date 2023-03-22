@@ -29,6 +29,8 @@ import com.example.tfgsmartwatch.utils.util;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 import retrofit2.Call;
@@ -47,6 +49,7 @@ public class Course extends AppCompatActivity {
 
     private SensorManager sensorManagerHeartRate,sensorManagerAccelerometer;
     private Sensor sensorRitmoCardiaco,sensorAcelerometer;
+    private String name,dayName,diaActual;
 
     public int movementTimeThread;
     private int higherHeartRate,lowerHeartRate,movementTime,movementPercentage,noMovementTime,noMovementPercentage;
@@ -55,6 +58,13 @@ public class Course extends AppCompatActivity {
     public double accelerationCurrentValue,accelerationPreviousValue,changeInAcceleration;
     public ArrayList<String> resultados=new ArrayList<>();
 
+    public ArrayList<ArrayList<String>> resultadosNuevos=new ArrayList<>();
+    public ArrayList<ArrayList<String>> resultadosNuevosDia=new ArrayList<>();
+    public ArrayList<ArrayList<String>> ejemplo=new ArrayList<>();
+    public ArrayList<ArrayList<String>> ritmos;
+    public ArrayList<ArrayList<Integer>> movimientos;
+
+    public int contador=0,contador1=0;
 
 
     SharedPreferences prefs;
@@ -65,12 +75,80 @@ public class Course extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course);
 
+        //Recibo datos y los convierto al final en un array de arrays con las asignaturas de ese día ordenadas por hora.
         Bundle parametros = this.getIntent().getExtras();
         if(parametros !=null){
            resultados=getIntent().getExtras().getStringArrayList("resultados");
 
         }
+        resultadosNuevos=split(4,resultados);
 
+        for(int i=0;i<resultadosNuevos.size();i++){
+            for(int j=0;j<4;j=j+4){
+                if(!resultadosNuevos.get(i).get(j).equals("recreo")){
+                    diaActual=resultadosNuevos.get(i).get(j+1);
+                    LocalTime timeValue = LocalTime.parse(resultadosNuevos.get(i).get(j+2));
+                    LocalTime timeValue1 = LocalTime.parse(resultadosNuevos.get(i).get(j+3));
+                    LocalTime ahora = LocalTime.now();
+
+                    dayName= LocalDate.now().getDayOfWeek().name();
+
+                    switch (dayName){
+                        case "MONDAY":
+                            dayName="lunes";
+                            break;
+                        case "TUESDAY":
+                            dayName="martes";
+                            break;
+                        case "WEDNESDAY":
+                            dayName="miercoles";
+                            break;
+                        case "THURSDAY":
+                            dayName="jueves";
+                            break;
+                        case "FRIDAY":
+                            dayName="viernes";
+                            break;
+                        case "SATURDAY":
+                            dayName="sábado";
+                            break;
+                        case "SUNDAY":
+                            dayName="domingo";
+                            break;
+                    }
+                    if(dayName.equals(diaActual)){
+                        resultadosNuevosDia.add(resultadosNuevos.get(i));
+                    }
+
+                    /*if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0 && dayName.equals(diaActual)){
+
+                        buttonClase.setEnabled(true);
+
+                    }*/
+
+
+                }else{
+                    LocalTime timeValue = LocalTime.parse(resultadosNuevos.get(i).get(j+2));
+                    LocalTime timeValue1 = LocalTime.parse(resultadosNuevos.get(i).get(j+3));
+                    LocalTime ahora = LocalTime.now();
+
+                    dayName=LocalDate.now().getDayOfWeek().name();
+/*
+                    if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0 && dayName.equals(diaActual) ){
+                        buttonRecreo.setEnabled(true);
+
+
+                    }*/
+
+                }
+            }
+        }
+
+        ejemplo=ordenar(resultadosNuevosDia);
+
+
+//***********************************************************************************************************************************
+// ***********************************************************************************************************************************
         bindUI();
 
         /*textViewPuntuacion.setText("Puntuacion= "+puntuacion);*/
@@ -131,27 +209,23 @@ public class Course extends AppCompatActivity {
 //********************************************************************************************************************************
 //********************************************************************************************************************************
 
-        //Hilo que se repite cada minuto.
-        class Hilo1 extends Thread {
+        class Hilo2 extends Thread {
             @Override
             public void run() {
-                while (true) {
+                while (contador1<3) {
                     try {
-                        Thread.sleep(30000);
+                        Thread.sleep(10000);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                contador++;
+                                /*if(movimientos.isEmpty() && ritmos.isEmpty()){
 
-                                Toast.makeText(Course.this, "Puntuacion="+puntuacion, Toast.LENGTH_SHORT).show();
-                                double changeInAcceleration1=changeInAcceleration;
-                                float currentHeartRate1=currentHeartRate;
-
-
-                                situaciones(changeInAcceleration1,currentHeartRate1);
-
-
+                                }*/
+                                Toast.makeText(Course.this, "ADIOS", Toast.LENGTH_SHORT).show();
 
                             }
+
                         });
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -159,6 +233,51 @@ public class Course extends AppCompatActivity {
                 }
             }
         }
+
+
+
+        //Hilo que se repite cada 30 segundos.
+        class Hilo1 extends Thread {
+            @Override
+            public void run() {
+                while (contador<6) {
+                    try {
+                        Thread.sleep(10000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                contador++;
+                                int indice=getIndice(ejemplo);
+
+
+                                //Aquí añadimos los datos a los arrays
+                                double changeInAcceleration1=changeInAcceleration;
+                                float currentHeartRate1=currentHeartRate;
+
+                                movimientos.get(indice).add((int)changeInAcceleration1);
+
+                                if(currentHeartRate1>lowerHeartRate &&currentHeartRate1<higherHeartRate){
+                                    ritmos.get(indice).add("SI");
+                                }else{
+                                    ritmos.get(indice).add("NO");
+                                }
+                                Toast.makeText(Course.this, "HOLA", Toast.LENGTH_SHORT).show();
+                                if(contador==5){
+                                    if (movimientos.isEmpty() && ritmos.isEmpty()) {
+
+                                    }
+                                }
+                            }
+
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
 
         /*movementTimeThread=movementTime*60000;*/
         movementTimeThread=20000;
@@ -176,13 +295,103 @@ public class Course extends AppCompatActivity {
             showAcceleration();
 
             /*hilo.start();*/
-            new Hilo1().start();
+            Thread hilo1=new Thread(new Hilo1(),"hilo1");
+            Thread hilo2=new Thread(new Hilo1(),"hilo2");
+            movimientos=new ArrayList<>();
+            ritmos=new ArrayList<>();
+            for(int i=0;i<ejemplo.size();i++){
+                movimientos.add(new ArrayList<Integer>());
+                ritmos.add(new ArrayList<String>());
+            }
+
+
+            hilo1.start();
+            /*try {
+                hilo1.join();
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
+            hilo2.start();*/
+
+
+
+           /* new Hilo1().start();*/
+
 
         }
     }//Fin onCreate
 
 //********************************************************************************************************************************
 //********************************************************************************************************************************
+
+    public static ArrayList<ArrayList<String>> split(int numberOfElements, ArrayList<String> sentences) {
+        ArrayList<ArrayList<String>> lists = new ArrayList<ArrayList<String>>();
+        int index = 0;
+        for (String sentence : sentences) {
+            if (index % numberOfElements == 0) {
+                lists.add(new ArrayList<String>());
+            }
+            lists.get(index / numberOfElements).add(sentences.get(index));
+            index++;
+        }
+        return lists;
+    }
+
+    public int menor(ArrayList<ArrayList<String>> array){
+        int posicion=0;
+        ArrayList<String> menor;
+        menor=array.get(0);
+
+        LocalTime timeValue = LocalTime.parse(menor.get(2));
+        /*for(int i=0;i<resultadosNuevos.size();i++){*/
+        for(int i=0;i<array.size();i++){
+            for(int j=0;j<4;j=j+4) {
+                LocalTime timeValue1 = LocalTime.parse(array.get(i).get(j+2));
+                LocalTime ahora = LocalTime.now();
+
+
+                if(timeValue1.compareTo(timeValue)<0){
+                    posicion=i;
+                    timeValue = LocalTime.parse(array.get(i).get(j+2));
+
+                }
+
+            }
+
+        }
+        return posicion;
+    }
+
+
+    public ArrayList<ArrayList<String>> ordenar(ArrayList<ArrayList<String>> array){
+        ArrayList<ArrayList<String>> aux= new ArrayList<>(array);
+        ArrayList<ArrayList<String>> aux1= new ArrayList<>();
+        int posicion;
+
+        for(int i=0;i<aux.size();i++){
+            posicion=menor(array);
+            aux1.add(array.get(posicion));
+            array.remove(posicion);
+        }
+        return aux1;
+    }
+
+    public int getIndice(ArrayList<ArrayList<String>> array){
+        LocalTime ahora = LocalTime.now();
+        int indice=0;
+
+        for(int i=0;i<array.size();i++){
+            for(int j=0;j<4;j=j+4){
+                LocalTime timeValue = LocalTime.parse(array.get(i).get(j+2));
+                LocalTime timeValue1 = LocalTime.parse(array.get(i).get(j+3));
+
+                if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0){
+                    indice=i;
+                }
+            }
+        }
+        return indice;
+    }
 
 
     private void bindUI(){
@@ -195,6 +404,9 @@ public class Course extends AppCompatActivity {
 
 
     }
+
+
+
 
 
     private void showHeartRate() {
