@@ -15,6 +15,10 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -642,7 +646,8 @@ public class Course extends AppCompatActivity {
 
             //4.Movimiento alto
             if(changeInAcceleration>5){
-                Toast.makeText(this, higherMovementMessage, Toast.LENGTH_SHORT).show();
+                /*Toast.makeText(this, higherMovementMessage, Toast.LENGTH_SHORT).show();*/
+                popUp(higherMovementMessage);
 
                 /*Intent intent=new Intent(Course.this,Feedback.class);
                 intent.putExtra("datos",higherMovementMessage);
@@ -654,6 +659,34 @@ public class Course extends AppCompatActivity {
                 puntuacion=puntuacion+1;
             }
 
+    }
+
+    public void popUp(String mensaje){
+
+        View popupView= LayoutInflater.from(getApplicationContext()).inflate(R.layout.popup_validar,null,false);
+        final PopupWindow popupWindow=new PopupWindow(popupView,500,800,false);
+        popupWindow.showAtLocation(textViewScore, Gravity.CENTER,0,0);
+
+        TextView tv=popupView.findViewById(R.id.textViewPopUp);
+        tv.setText(mensaje);
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                //***Aquí agregamos el proceso a ejecutar.
+                popupWindow.dismiss();
+
+                handler.removeCallbacks(null);
+            }
+        }, 2000 );//define el tiempo.
+
+        /*popupView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });*/
     }
 
 

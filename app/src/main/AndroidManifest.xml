@@ -20,9 +20,6 @@
         android:theme="@android:style/Theme.DeviceDefault"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".Recreo"
-            android:exported="false" />
-        <activity
             android:name=".activities.finalScore"
             android:exported="false"
             android:theme="@style/LoginScreen" />

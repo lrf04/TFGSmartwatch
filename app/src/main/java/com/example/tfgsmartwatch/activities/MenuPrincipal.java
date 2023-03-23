@@ -6,10 +6,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Vibrator;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,7 +70,7 @@ public class MenuPrincipal extends AppCompatActivity {
         setContentView(R.layout.activity_menu_principal);
         bindUI();
         buttonClase.setEnabled(false);
-        buttonRecreo.setEnabled(false);
+
 
         //SharedPreferences
         prefs = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
@@ -248,7 +253,7 @@ public class MenuPrincipal extends AppCompatActivity {
                                 dayName=LocalDate.now().getDayOfWeek().name();
 
                                 if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0 && dayName.equals(diaActual) ){
-                                    buttonRecreo.setEnabled(true);
+
 
 
                                 }
@@ -355,7 +360,6 @@ public class MenuPrincipal extends AppCompatActivity {
             public void onClick(View v) {
 
 
-
                 Intent intent=new Intent(MenuPrincipal.this, Course.class);
                 intent.putStringArrayListExtra("resultados",resultados);
                 startActivity(intent);
@@ -437,7 +441,6 @@ public class MenuPrincipal extends AppCompatActivity {
 
     private void bindUI(){
         buttonClase =(Button) findViewById(R.id.buttonClase);
-        buttonRecreo =(Button) findViewById(R.id.buttonPatio);
         tv1=(TextView) findViewById(R.id.textViewBienvenida);
     }
 
@@ -446,6 +449,34 @@ public class MenuPrincipal extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
 
+    }
+
+    public void popUp(String mensaje){
+
+        View popupView= LayoutInflater.from(getApplicationContext()).inflate(R.layout.popup_validar,null,false);
+        final PopupWindow popupWindow=new PopupWindow(popupView,500,800,false);
+        popupWindow.showAtLocation(buttonClase, Gravity.CENTER,0,0);
+
+        TextView tv=popupView.findViewById(R.id.textViewPopUp);
+        tv.setText(mensaje);
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                //***Aquí agregamos el proceso a ejecutar.
+                popupWindow.dismiss();
+
+                handler.removeCallbacks(null);
+            }
+        }, 2000 );//define el tiempo.
+
+        /*popupView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });*/
     }
 
 }
