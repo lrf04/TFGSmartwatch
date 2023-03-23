@@ -41,7 +41,7 @@ public class Course extends AppCompatActivity {
     private TextView textViewTime,textViewScore,textViewDifference,textViewCurrent,textViewPrevious,textViewPuntuacion;
     private ProgressBar pb;
 
-    public volatile int puntuacion;
+    public int puntuacion,umbral;
     public int higherRateCont,lowerRateCont,higherMovementCont,lowerMovementCont,noMovementCont,higherRateMovementCont,lowerRateMovementCont,higherRateLowerMovementCont,lowerRateHigherMovementCont;
     public int totalNervioso,vecesCalmado,vecesNoCalmado,hola;
 
@@ -81,8 +81,10 @@ public class Course extends AppCompatActivity {
            resultados=getIntent().getExtras().getStringArrayList("resultados");
 
         }
-        resultadosNuevos=split(4,resultados);
 
+
+        resultadosNuevos=split(4,resultados);
+/*
         for(int i=0;i<resultadosNuevos.size();i++){
             for(int j=0;j<4;j=j+4){
                 if(!resultadosNuevos.get(i).get(j).equals("recreo")){
@@ -120,11 +122,11 @@ public class Course extends AppCompatActivity {
                         resultadosNuevosDia.add(resultadosNuevos.get(i));
                     }
 
-                    /*if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0 && dayName.equals(diaActual)){
+                    *//*if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0 && dayName.equals(diaActual)){
 
                         buttonClase.setEnabled(true);
 
-                    }*/
+                    }*//*
 
 
                 }else{
@@ -133,16 +135,63 @@ public class Course extends AppCompatActivity {
                     LocalTime ahora = LocalTime.now();
 
                     dayName=LocalDate.now().getDayOfWeek().name();
-/*
+*//*
                     if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0 && dayName.equals(diaActual) ){
                         buttonRecreo.setEnabled(true);
 
 
-                    }*/
+                    }*//*
 
                 }
             }
+        }*/
+        for(int i=0;i<resultadosNuevos.size();i++){
+            for(int j=0;j<4;j=j+4){
+                    diaActual=resultadosNuevos.get(i).get(j+1);
+                    LocalTime timeValue = LocalTime.parse(resultadosNuevos.get(i).get(j+2));
+                    LocalTime timeValue1 = LocalTime.parse(resultadosNuevos.get(i).get(j+3));
+                    LocalTime ahora = LocalTime.now();
+
+                    dayName= LocalDate.now().getDayOfWeek().name();
+
+                    switch (dayName){
+                        case "MONDAY":
+                            dayName="lunes";
+                            break;
+                        case "TUESDAY":
+                            dayName="martes";
+                            break;
+                        case "WEDNESDAY":
+                            dayName="miercoles";
+                            break;
+                        case "THURSDAY":
+                            dayName="jueves";
+                            break;
+                        case "FRIDAY":
+                            dayName="viernes";
+                            break;
+                        case "SATURDAY":
+                            dayName="sábado";
+                            break;
+                        case "SUNDAY":
+                            dayName="domingo";
+                            break;
+                    }
+                    if(dayName.equals(diaActual)){
+                        resultadosNuevosDia.add(resultadosNuevos.get(i));
+                    }
+
+                    /*if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0 && dayName.equals(diaActual)){
+
+                    buttonClase.setEnabled(true);
+
+                }*/
+
+
+
         }
+    }
+
 
         ejemplo=ordenar(resultadosNuevosDia);
 
@@ -240,7 +289,7 @@ public class Course extends AppCompatActivity {
         class Hilo1 extends Thread {
             @Override
             public void run() {
-                while (contador<6) {
+                while (contador<7) {
                     try {
                         Thread.sleep(10000);
                         runOnUiThread(new Runnable() {
@@ -255,19 +304,32 @@ public class Course extends AppCompatActivity {
                                 double changeInAcceleration1=changeInAcceleration;
                                 float currentHeartRate1=currentHeartRate;
 
-                                movimientos.get(indice).add((int)changeInAcceleration1);
+                                /*if(ejemplo.get(indice).get(1).equals("recreo")){
+                                    //Cambiar variable para que el hilo pare.
+                                    Intent intent=new Intent(Course.this,Recreo.class);
+                                    startActivity(intent);
+                                    contador=6;
+                                }else{*/
 
-                                if(currentHeartRate1>lowerHeartRate &&currentHeartRate1<higherHeartRate){
-                                    ritmos.get(indice).add("SI");
-                                }else{
-                                    ritmos.get(indice).add("NO");
-                                }
-                                Toast.makeText(Course.this, "HOLA", Toast.LENGTH_SHORT).show();
-                                if(contador==5){
-                                    if (movimientos.isEmpty() && ritmos.isEmpty()) {
 
+                                    movimientos.get(indice).add((int)changeInAcceleration1);
+
+                                    if(currentHeartRate1>lowerHeartRate && currentHeartRate1<higherHeartRate){
+                                        ritmos.get(indice).add("SI");
+                                    }else{
+                                        ritmos.get(indice).add("NO");
                                     }
-                                }
+                                    Toast.makeText(Course.this, "AHORA", Toast.LENGTH_SHORT).show();
+
+                                    situaciones(changeInAcceleration1,currentHeartRate1);
+                                    if(contador==6){
+                                        if (movimientos.isEmpty() && ritmos.isEmpty() && puntuacion>0) {
+
+                                        }
+                                    }
+
+                                /*}*/
+
                             }
 
                         });
@@ -297,12 +359,15 @@ public class Course extends AppCompatActivity {
             /*hilo.start();*/
             Thread hilo1=new Thread(new Hilo1(),"hilo1");
             Thread hilo2=new Thread(new Hilo1(),"hilo2");
-            movimientos=new ArrayList<>();
-            ritmos=new ArrayList<>();
-            for(int i=0;i<ejemplo.size();i++){
-                movimientos.add(new ArrayList<Integer>());
-                ritmos.add(new ArrayList<String>());
-            }
+
+                movimientos=new ArrayList<>();
+                ritmos=new ArrayList<>();
+                for(int i=0;i<ejemplo.size();i++){
+                    movimientos.add(new ArrayList<Integer>());
+                    ritmos.add(new ArrayList<String>());
+                }
+
+
 
 
             hilo1.start();
@@ -502,7 +567,7 @@ public class Course extends AppCompatActivity {
 
 
 
-    public void comprobar(){
+    /*public void comprobar(){
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -519,7 +584,7 @@ public class Course extends AppCompatActivity {
                 handler.removeCallbacks(null);
             }
         }, 10000 );//define el tiempo.
-    }
+    }*/
 
     /*class Hilo2 extends Thread {
         @Override
@@ -550,12 +615,15 @@ public class Course extends AppCompatActivity {
 
     public void situaciones(double movement,float rate){
 
-            //1.Ritmo alto y movimiento bajo
-            /*if(currentHeartRate>higherHeartRate && changeInAcceleration==0){
-                totalNervioso=totalNervioso+1;
-                higherRateLowerMovementCont=higherRateLowerMovementCont+1;
+            //1.Ritmo alto y movimiento alto
+            /*if(currentHeartRate>higherHeartRate && changeInAcceleration>5){
+                Intent intent=new Intent(Course.this,Feedback.class);
+                intent.putExtra("datos",higherRateMovementMessage);
+                startActivity(intent);
+            }*/
 
-                new Hilo2().start();
+            //2.Ritmo alto y movimiento bajo
+            /*else if(currentHeartRate>higherHeartRate && changeInAcceleration<5){
 
                 Intent intent=new Intent(Course.this,Feedback.class);
                 intent.putExtra("datos",higherRateLowerMovementMessage);
@@ -563,120 +631,27 @@ public class Course extends AppCompatActivity {
 
             }*/
 
-            //2.Ritmo bajo y movimiento alto
-            /*else if(currentHeartRate<lowerHeartRate && changeInAcceleration>14){
-                totalNervioso=totalNervioso+1;
-                lowerRateHigherMovementCont=lowerRateHigherMovementCont+1;
 
-                new Hilo2().start();
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",lowerRateHigherMovementMessage);
-                startActivity(intent);
-
-            }*/
-
-
-            //3.Ritmo y movimiento altos
-            /*else if(currentHeartRate>higherHeartRate && changeInAcceleration>14){
-                totalNervioso=totalNervioso+1;
-                higherRateMovementCont=higherRateMovementCont+1;
-
-                new Hilo2().start();
-
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",higherRateMovementMessage);
-                startActivity(intent);
-            }*/
-            //4.Ritmo y movimiento bajos
-            /*else if(currentHeartRate<lowerHeartRate && changeInAcceleration==0){
-                totalNervioso=totalNervioso+1;
-                lowerRateMovementCont=lowerRateMovementCont+1;
-
-                new Hilo2().start();
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",lowerMovementMessage);
-                startActivity(intent);
-            }*/
-
-
-            //5.Movimiento alto
-            if(movement>=2){
-                totalNervioso=totalNervioso+1;
-                higherMovementCont=higherMovementCont+1;
-
-                textViewDifference.setBackgroundColor(Color.BLUE);
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",higherMovementMessage);
-                startActivity(intent);
-
-                comprobar();
-
-
-
-                /*new Hilo2().start();*/
-
-            }
-
-            //6.Ritmo cardiaco alto
+            //3.Ritmo alto
             /*else if(currentHeartRate>higherHeartRate){
-                totalNervioso=totalNervioso+1;
-                higherRateCont=higherRateCont+1;
-
-                new Hilo2().start();
 
                 Intent intent=new Intent(Course.this,Feedback.class);
                 intent.putExtra("datos",higherRateMessage);
                 startActivity(intent);
             }*/
 
-            //7.Ritmo cardiaco bajo
-            /*else if(currentHeartRate<lowerHeartRate){
-                totalNervioso=totalNervioso+1;
-                lowerRateCont=lowerRateCont+1;
+            //4.Movimiento alto
+            if(changeInAcceleration>5){
+                Toast.makeText(this, higherMovementMessage, Toast.LENGTH_SHORT).show();
 
-                new Hilo2().start();
-
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",lowerRateMessage);
-                startActivity(intent);
-            }*/
-
-            //8.Movimiento bajo
-           /* else if(changeInAcceleration<5){
-                totalNervioso=totalNervioso+1;
-                lowerMovementCont=lowerMovementCont+1;
-
-                new Hilo2().start();
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",lowerMovementMessage);
-                startActivity(intent);
-
-            }*/
-            //9.Sin movimiento
-           /* else if(changeInAcceleration==0){
-                totalNervioso=totalNervioso+1;
-                noMovementCont=noMovementCont+1;
-
-                new Hilo2().start();
-
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",noMovementMessage);
-                startActivity(intent);
-
-            }*/
-
-
-            else if(changeInAcceleration>5){
-                textViewDifference.setBackgroundColor(Color.GREEN);
+                /*Intent intent=new Intent(Course.this,Feedback.class);
+                intent.putExtra("datos",higherMovementMessage);
+                startActivity(intent);*/
             }
+
+
             else{
-                textViewDifference.setBackgroundColor(Color.YELLOW);
+                puntuacion=puntuacion+1;
             }
 
     }

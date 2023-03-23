@@ -22,7 +22,7 @@ public class Feedback extends AppCompatActivity {
         setContentView(R.layout.activity_feedback);
         textViewFeedback=(TextView) findViewById(R.id.textViewFeedback);
 
-        int tiempoTranscurrir = 5000; //1 segundo, 1000 millisegundos.
+        int tiempoTranscurrir = 3000; //1 segundo, 1000 millisegundos.
 
         Bundle parametros = this.getIntent().getExtras();
         if(parametros !=null){
