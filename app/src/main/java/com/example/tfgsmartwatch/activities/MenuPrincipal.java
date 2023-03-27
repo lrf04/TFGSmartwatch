@@ -160,6 +160,11 @@ public class MenuPrincipal extends AppCompatActivity {
                         int z=periodos.get(i).size();
                         numeros.add(z);
                         for(int j=0;j<z;j++){
+                            //cambio
+                            int valor=periodos.get(i).get(j).getId();
+                            String variable=String.valueOf(valor);
+                            horas.add(variable);
+
                             horas.add(periodos.get(i).get(j).getDay());
                             horas.add(periodos.get(i).get(j).getTime());
                             horas.add(periodos.get(i).get(j).getTimeFinish());
@@ -170,7 +175,9 @@ public class MenuPrincipal extends AppCompatActivity {
                     for(int i=0;i<nombres.size();i++){
                         resultados.add(nombres.get(i));
                         int z=numeros.get(i);
-                        int v=3*z;
+                        //Cambio
+                        int v=4*z;
+                        /*int v=3*z;*/
                         int w=0;
 
 
@@ -178,9 +185,13 @@ public class MenuPrincipal extends AppCompatActivity {
                             resultados.add(horasAux.get(j));
 
                             w=w+1;
-                            if(w%3==0 && j!=(v-1)){
+                            //cambio
+                            if(w%4==0 && j!=(v-1)){
                                 resultados.add(nombres.get(i));
                             }
+                            /*if(w%3==0 && j!=(v-1)){
+                                resultados.add(nombres.get(i));
+                            }*/
 
                         }
                         for(int p=0;p<v;p++){
@@ -188,10 +199,14 @@ public class MenuPrincipal extends AppCompatActivity {
                         }
                     }
 
+                    if(resultados.isEmpty()){
+
+                    }
 
 
 
-                    resultadosNuevos=split(4,resultados);
+
+                    resultadosNuevos=split(5,resultados);
 
                     /*ejemplo=ordenar(resultadosNuevos);
                     if(ejemplo.isEmpty()){
@@ -202,11 +217,11 @@ public class MenuPrincipal extends AppCompatActivity {
 
 
                     for(int i=0;i<resultadosNuevos.size();i++){
-                        for(int j=0;j<4;j=j+4){
+                        for(int j=0;j<5;j=j+5){
                             if(!resultadosNuevos.get(i).get(j).equals("recreo")){
-                                diaActual=resultadosNuevos.get(i).get(j+1);
-                                LocalTime timeValue = LocalTime.parse(resultadosNuevos.get(i).get(j+2));
-                                LocalTime timeValue1 = LocalTime.parse(resultadosNuevos.get(i).get(j+3));
+                                diaActual=resultadosNuevos.get(i).get(j+2);
+                                LocalTime timeValue = LocalTime.parse(resultadosNuevos.get(i).get(j+3));
+                                LocalTime timeValue1 = LocalTime.parse(resultadosNuevos.get(i).get(j+4));
                                 LocalTime ahora = LocalTime.now();
 
                                 dayName=LocalDate.now().getDayOfWeek().name();
@@ -246,8 +261,8 @@ public class MenuPrincipal extends AppCompatActivity {
 
 
                             }else{
-                                LocalTime timeValue = LocalTime.parse(resultadosNuevos.get(i).get(j+2));
-                                LocalTime timeValue1 = LocalTime.parse(resultadosNuevos.get(i).get(j+3));
+                                LocalTime timeValue = LocalTime.parse(resultadosNuevos.get(i).get(j+3));
+                                LocalTime timeValue1 = LocalTime.parse(resultadosNuevos.get(i).get(j+4));
                                 LocalTime ahora = LocalTime.now();
 
                                 dayName=LocalDate.now().getDayOfWeek().name();

@@ -87,7 +87,7 @@ public class Course extends AppCompatActivity {
         }
 
 
-        resultadosNuevos=split(4,resultados);
+        resultadosNuevos=split(5,resultados);
 /*
         for(int i=0;i<resultadosNuevos.size();i++){
             for(int j=0;j<4;j=j+4){
@@ -150,10 +150,10 @@ public class Course extends AppCompatActivity {
             }
         }*/
         for(int i=0;i<resultadosNuevos.size();i++){
-            for(int j=0;j<4;j=j+4){
-                    diaActual=resultadosNuevos.get(i).get(j+1);
-                    LocalTime timeValue = LocalTime.parse(resultadosNuevos.get(i).get(j+2));
-                    LocalTime timeValue1 = LocalTime.parse(resultadosNuevos.get(i).get(j+3));
+            for(int j=0;j<5;j=j+5){
+                    diaActual=resultadosNuevos.get(i).get(j+2);
+                    LocalTime timeValue = LocalTime.parse(resultadosNuevos.get(i).get(j+3));
+                    LocalTime timeValue1 = LocalTime.parse(resultadosNuevos.get(i).get(j+4));
                     LocalTime ahora = LocalTime.now();
 
                     dayName= LocalDate.now().getDayOfWeek().name();
@@ -197,7 +197,9 @@ public class Course extends AppCompatActivity {
     }
 
 
+
         ejemplo=ordenar(resultadosNuevosDia);
+
 
 
 //***********************************************************************************************************************************
@@ -293,15 +295,22 @@ public class Course extends AppCompatActivity {
         class Hilo1 extends Thread {
             @Override
             public void run() {
-                while (contador<7) {
+                while (contador<23) {
                     try {
                         Thread.sleep(10000);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                int indice=getIndice(ejemplo);
+                                LocalTime ahora = LocalTime.now();
+                                LocalTime fin = LocalTime.parse(ejemplo.get(indice).get(4));
+                                //Condicion de finalización
+                                if(ahora.compareTo(fin)>0 && indice==(ejemplo.size()-1)){
+                                    //Se debe hacer el popUp y modificar la variable del while del hilo para que pare
+                                }
 
                                 contador++;
-                                int indice=getIndice(ejemplo);
+
 
 
                                 //Aquí añadimos los datos a los arrays
@@ -326,7 +335,7 @@ public class Course extends AppCompatActivity {
                                     Toast.makeText(Course.this, "AHORA", Toast.LENGTH_SHORT).show();
 
                                     situaciones(changeInAcceleration1,currentHeartRate1);
-                                    if(contador==6){
+                                    if(contador==20){
                                         if (movimientos.isEmpty() && ritmos.isEmpty() && puntuacion>0) {
 
                                         }
@@ -411,17 +420,17 @@ public class Course extends AppCompatActivity {
         ArrayList<String> menor;
         menor=array.get(0);
 
-        LocalTime timeValue = LocalTime.parse(menor.get(2));
+        LocalTime timeValue = LocalTime.parse(menor.get(3));
         /*for(int i=0;i<resultadosNuevos.size();i++){*/
         for(int i=0;i<array.size();i++){
-            for(int j=0;j<4;j=j+4) {
-                LocalTime timeValue1 = LocalTime.parse(array.get(i).get(j+2));
+            for(int j=0;j<5;j=j+5) {
+                LocalTime timeValue1 = LocalTime.parse(array.get(i).get(j+3));
                 LocalTime ahora = LocalTime.now();
 
 
                 if(timeValue1.compareTo(timeValue)<0){
                     posicion=i;
-                    timeValue = LocalTime.parse(array.get(i).get(j+2));
+                    timeValue = LocalTime.parse(array.get(i).get(j+3));
 
                 }
 
@@ -450,9 +459,9 @@ public class Course extends AppCompatActivity {
         int indice=0;
 
         for(int i=0;i<array.size();i++){
-            for(int j=0;j<4;j=j+4){
-                LocalTime timeValue = LocalTime.parse(array.get(i).get(j+2));
-                LocalTime timeValue1 = LocalTime.parse(array.get(i).get(j+3));
+            for(int j=0;j<5;j=j+5){
+                LocalTime timeValue = LocalTime.parse(array.get(i).get(j+3));
+                LocalTime timeValue1 = LocalTime.parse(array.get(i).get(j+4));
 
                 if(ahora.compareTo(timeValue)>0 && ahora.compareTo(timeValue1)<0){
                     indice=i;
@@ -620,38 +629,29 @@ public class Course extends AppCompatActivity {
     public void situaciones(double movement,float rate){
 
             //1.Ritmo alto y movimiento alto
-            /*if(currentHeartRate>higherHeartRate && changeInAcceleration>5){
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",higherRateMovementMessage);
-                startActivity(intent);
-            }*/
+            if(rate>higherHeartRate && movement>5){
+                popUp(higherRateMovementMessage);
+            }
 
             //2.Ritmo alto y movimiento bajo
-            /*else if(currentHeartRate>higherHeartRate && changeInAcceleration<5){
+            else if(rate>higherHeartRate && movement<5){
 
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",higherRateLowerMovementMessage);
-                startActivity(intent);
+                popUp(higherRateLowerMovementMessage);
 
-            }*/
+            }
 
 
             //3.Ritmo alto
-            /*else if(currentHeartRate>higherHeartRate){
+            else if(rate>higherHeartRate){
+                popUp(higherRateMessage);
 
-                Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",higherRateMessage);
-                startActivity(intent);
-            }*/
+            }
 
             //4.Movimiento alto
-            if(changeInAcceleration>5){
+            else if(movement>5){
                 /*Toast.makeText(this, higherMovementMessage, Toast.LENGTH_SHORT).show();*/
                 popUp(higherMovementMessage);
 
-                /*Intent intent=new Intent(Course.this,Feedback.class);
-                intent.putExtra("datos",higherMovementMessage);
-                startActivity(intent);*/
             }
 
 
