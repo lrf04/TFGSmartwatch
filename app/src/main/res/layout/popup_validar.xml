@@ -7,7 +7,7 @@
     android:background="@color/primary_color">
 
     <TextView
-        android:id="@+id/textViewPopUp"
+        android:id="@+id/textViewPopUpPuntuacion"
         android:layout_width="132dp"
         android:layout_height="45dp"
         android:layout_marginTop="16dp"

@@ -5,16 +5,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,16 +25,18 @@ import android.widget.Toast;
 import com.example.tfgsmartwatch.API.Api;
 import com.example.tfgsmartwatch.API.ApiService;
 import com.example.tfgsmartwatch.R;
-import com.example.tfgsmartwatch.models.Alumno;
 import com.example.tfgsmartwatch.models.ConfigurationStudent;
+import com.example.tfgsmartwatch.models.Data;
+import com.example.tfgsmartwatch.models.DatosClase;
 import com.example.tfgsmartwatch.utils.util;
-
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -47,16 +48,20 @@ public class Course extends AppCompatActivity {
 
     public int puntuacion,umbral;
     public int higherRateCont,lowerRateCont,higherMovementCont,lowerMovementCont,noMovementCont,higherRateMovementCont,lowerRateMovementCont,higherRateLowerMovementCont,lowerRateHigherMovementCont;
-    public int totalNervioso,vecesCalmado,vecesNoCalmado,hola;
+
+    public boolean activo=false;
 
     private static final int CODE_GPS = 0, CODE_SENSOR = 1;
 
     private SensorManager sensorManagerHeartRate,sensorManagerAccelerometer;
     private Sensor sensorRitmoCardiaco,sensorAcelerometer;
     private String name,dayName,diaActual;
+    public Boolean variable1=false;
+    public Data datosNuevos;
 
     public int movementTimeThread;
     private int higherHeartRate,lowerHeartRate,movementTime,movementPercentage,noMovementTime,noMovementPercentage;
+    public int configuracionId,studentId;
     private String higherRateMessage,lowerRateMessage,lowerMovementMessage,higherMovementMessage,higherRateLowerMovementMessage,lowerRateHigherMovementMessage,higherRateMovementMessage,lowerRateMovementMessage,noMovementMessage;
     public float currentHeartRate;
     public double accelerationCurrentValue,accelerationPreviousValue,changeInAcceleration;
@@ -217,6 +222,7 @@ public class Course extends AppCompatActivity {
         ApiService service= Api.getApi().create(ApiService.class);
         Call<ConfigurationStudent> configurationCall=service.getConfiguration(id);
 
+
         configurationCall.enqueue(new Callback<ConfigurationStudent>() {
             @Override
             public void onResponse(Call<ConfigurationStudent> call, Response<ConfigurationStudent> response) {
@@ -225,6 +231,8 @@ public class Course extends AppCompatActivity {
                     /*Toast.makeText(Course.this, "El servidor retornó datos", Toast.LENGTH_SHORT).show();*/
 
                     //Asignación de parámetros
+                    configuracionId=configuration.getId();
+                    studentId=configuration.getStudentId();
                     higherHeartRate=configuration.getHigherHeartRate();
                     lowerHeartRate=configuration.getLowerHeartRate();
                     movementTime=configuration.getMovementMonitoringTime();
@@ -264,30 +272,7 @@ public class Course extends AppCompatActivity {
 //********************************************************************************************************************************
 //********************************************************************************************************************************
 
-        class Hilo2 extends Thread {
-            @Override
-            public void run() {
-                while (contador1<3) {
-                    try {
-                        Thread.sleep(10000);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                contador++;
-                                /*if(movimientos.isEmpty() && ritmos.isEmpty()){
 
-                                }*/
-                                Toast.makeText(Course.this, "ADIOS", Toast.LENGTH_SHORT).show();
-
-                            }
-
-                        });
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
 
 
 
@@ -295,23 +280,32 @@ public class Course extends AppCompatActivity {
         class Hilo1 extends Thread {
             @Override
             public void run() {
-                while (contador<23) {
+                while (activo) {
                     try {
-                        Thread.sleep(10000);
+                        Thread.sleep(30000);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 int indice=getIndice(ejemplo);
                                 LocalTime ahora = LocalTime.now();
                                 LocalTime fin = LocalTime.parse(ejemplo.get(indice).get(4));
-                                //Condicion de finalización
-                                if(ahora.compareTo(fin)>0 && indice==(ejemplo.size()-1)){
-                                    //Se debe hacer el popUp y modificar la variable del while del hilo para que pare
+
+                                if(indice==(ejemplo.size()-1)){
+                                    variable1=true;
                                 }
 
-                                contador++;
+                                //Condicion de finalización
+                                if(variable1 && indice==0){
+                                    //Se debe hacer el popUp y modificar la variable del while del hilo para que pare
+                                    popUpPuntuacion("Tu puntuación ha sido: "+puntuacion);
+                                    datosNuevos=saveData(ritmos,movimientos);
+                                    datosNuevos.getStudentId();
 
+                                    //detener();
 
+                                }
+
+                                /*contador++;*/
 
                                 //Aquí añadimos los datos a los arrays
                                 double changeInAcceleration1=changeInAcceleration;
@@ -335,11 +329,7 @@ public class Course extends AppCompatActivity {
                                     Toast.makeText(Course.this, "AHORA", Toast.LENGTH_SHORT).show();
 
                                     situaciones(changeInAcceleration1,currentHeartRate1);
-                                    if(contador==20){
-                                        if (movimientos.isEmpty() && ritmos.isEmpty() && puntuacion>0) {
 
-                                        }
-                                    }
 
                                 /*}*/
 
@@ -371,7 +361,6 @@ public class Course extends AppCompatActivity {
 
             /*hilo.start();*/
             Thread hilo1=new Thread(new Hilo1(),"hilo1");
-            Thread hilo2=new Thread(new Hilo1(),"hilo2");
 
                 movimientos=new ArrayList<>();
                 ritmos=new ArrayList<>();
@@ -384,6 +373,7 @@ public class Course extends AppCompatActivity {
 
 
             hilo1.start();
+                activo=true;
             /*try {
                 hilo1.join();
             } catch (InterruptedException ie) {
@@ -625,6 +615,10 @@ public class Course extends AppCompatActivity {
         }
     }*/
 
+    public void detener(){
+        activo=false;
+    }
+
 
     public void situaciones(double movement,float rate){
 
@@ -667,7 +661,10 @@ public class Course extends AppCompatActivity {
         final PopupWindow popupWindow=new PopupWindow(popupView,500,800,false);
         popupWindow.showAtLocation(textViewScore, Gravity.CENTER,0,0);
 
-        TextView tv=popupView.findViewById(R.id.textViewPopUp);
+        Vibrator vibrator=(Vibrator)getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(1000);
+
+        TextView tv=popupView.findViewById(R.id.textViewPopUpPuntuacion);
         tv.setText(mensaje);
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -679,7 +676,7 @@ public class Course extends AppCompatActivity {
 
                 handler.removeCallbacks(null);
             }
-        }, 2000 );//define el tiempo.
+        }, 5000 );//define el tiempo.
 
         /*popupView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -689,5 +686,91 @@ public class Course extends AppCompatActivity {
         });*/
     }
 
+    public void popUpPuntuacion(String mensaje){
 
+        View popupView= LayoutInflater.from(getApplicationContext()).inflate(R.layout.popup_puntuacion_final,null,false);
+        final PopupWindow popupWindow=new PopupWindow(popupView,500,800,false);
+        popupWindow.showAtLocation(textViewScore, Gravity.CENTER,0,0);
+
+        TextView tv=popupView.findViewById(R.id.textViewPopUpPuntuacion);
+        tv.setText(mensaje);
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                //***Aquí agregamos el proceso a ejecutar.
+                popupWindow.dismiss();
+
+                handler.removeCallbacks(null);
+            }
+        }, 10000 );//define el tiempo.
+
+
+        /*popupView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });*/
+    }
+
+    public Data saveData(ArrayList<ArrayList<String>> ritmo,ArrayList<ArrayList<Integer>> movimiento) {
+        int vecesCalmadoMovimiento = 0, vecesNerviosoMovimiento = 0, vecesCalmadoRitmo = 0, vecesNerviosoRitmo = 0;
+        int umbral = 5;
+        ArrayList<DatosClase> listaDatosClase = new ArrayList<>();
+        Data datos = new Data();
+        DatosClase datosClase = new DatosClase();
+
+        LocalDate date = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd LLLL yyyy");
+        String formattedString = date.format(formatter);
+
+        datos.setConfiguracionId(configuracionId);
+        datos.setStudentId(studentId);
+        datos.setPuntuacion(puntuacion);
+        datos.setFecha(formattedString);
+        for (int i = 0; i < movimiento.size(); i++) {
+            for (int j = 0; j < movimiento.get(i).size(); j++) {
+                if (movimiento.get(i).get(j) > umbral) {
+                    vecesNerviosoMovimiento++;
+                } else {
+                    vecesCalmadoMovimiento++;
+                }
+
+                if (ritmo.get(i).get(j).equals("SI")) {
+                    vecesCalmadoRitmo++;
+                } else {
+                    vecesNerviosoRitmo++;
+                }
+
+
+                int periodoId = Integer.parseInt(ejemplo.get(i).get(1));
+                datosClase.setPeriodoId(periodoId);
+                datosClase.setTotalIntervalosMovimiento(movimiento.get(i).size());
+                datosClase.setTotalCalmadoMovimiento(vecesCalmadoMovimiento);
+                datosClase.setTotalNerviosoMovimiento(vecesNerviosoMovimiento);
+
+                datosClase.setTotalIntervalosRitmo(ritmo.get(i).size());
+                datosClase.setTotalCalmadoRitmo(vecesCalmadoRitmo);
+                datosClase.setTotalNerviosoRitmo(vecesNerviosoRitmo);
+
+
+                vecesNerviosoMovimiento = 0;
+                vecesNerviosoMovimiento = 0;
+                vecesCalmadoRitmo = 0;
+                vecesNerviosoRitmo = 0;
+
+
+            }
+            listaDatosClase.add(datosClase);
+            datosClase = new DatosClase();
+
+
+        }
+        datos.setDatosClase(listaDatosClase);
+        return datos;
+
+
+    }
 }

@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -34,7 +33,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -472,7 +470,7 @@ public class MenuPrincipal extends AppCompatActivity {
         final PopupWindow popupWindow=new PopupWindow(popupView,500,800,false);
         popupWindow.showAtLocation(buttonClase, Gravity.CENTER,0,0);
 
-        TextView tv=popupView.findViewById(R.id.textViewPopUp);
+        TextView tv=popupView.findViewById(R.id.textViewPopUpPuntuacion);
         tv.setText(mensaje);
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {

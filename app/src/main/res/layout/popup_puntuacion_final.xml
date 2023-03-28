@@ -7,7 +7,7 @@
     android:background="@color/primary_color">
 
     <TextView
-        android:id="@+id/textViewPopUp"
+        android:id="@+id/textViewPopUpPuntuacion"
         android:layout_width="117dp"
         android:layout_height="48dp"
         android:layout_marginTop="16dp"
@@ -30,6 +30,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewPopUp" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewPopUpPuntuacion" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

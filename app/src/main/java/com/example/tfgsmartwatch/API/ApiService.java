@@ -6,12 +6,15 @@ import android.content.res.Configuration;
 
 import com.example.tfgsmartwatch.models.Alumno;
 import com.example.tfgsmartwatch.models.ConfigurationStudent;
+import com.example.tfgsmartwatch.models.Data;
 import com.example.tfgsmartwatch.models.Subject;
 
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -27,4 +30,7 @@ public interface ApiService {
 
     @GET("api/configurations/{id}")
     Call<ConfigurationStudent> getConfiguration(@Path("id") int id);
+
+    @POST("api/data/configuration")
+    Call<Data> postConfigurationData(@Body Data datos);
 }
