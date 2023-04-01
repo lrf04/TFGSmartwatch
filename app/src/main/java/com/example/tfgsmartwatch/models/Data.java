@@ -11,18 +11,20 @@ public class Data {
     @SerializedName("configuracion_id")
     @Expose
     private Integer configuracionId;
-    @SerializedName("student_id")
+    @SerializedName("datos_clase")
     @Expose
-    private Integer studentId;
+    private List<DatosClase> datosClase;
     @SerializedName("fecha")
     @Expose
     private String fecha;
     @SerializedName("puntuacion")
     @Expose
     private Integer puntuacion;
-    @SerializedName("datos_clase")
+    @SerializedName("student_id")
     @Expose
-    private List<DatosClase> datosClase;
+    private Integer studentId;
+
+
 
     public Integer getConfiguracionId() {
         return configuracionId;

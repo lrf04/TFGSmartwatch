@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import com.example.tfgsmartwatch.models.Alumno;
 import com.example.tfgsmartwatch.models.ConfigurationStudent;
 import com.example.tfgsmartwatch.models.Data;
+import com.example.tfgsmartwatch.models.DatosClase;
 import com.example.tfgsmartwatch.models.Subject;
 
 import java.util.List;
@@ -32,5 +33,6 @@ public interface ApiService {
     Call<ConfigurationStudent> getConfiguration(@Path("id") int id);
 
     @POST("api/data/configuration")
-    Call<Data> postConfigurationData(@Body Data datos);
+    Call<Data> postConfigurationData(@Body Data datosNuevos);
+
 }

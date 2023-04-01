@@ -14,6 +14,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +29,11 @@ import com.example.tfgsmartwatch.R;
 import com.example.tfgsmartwatch.models.ConfigurationStudent;
 import com.example.tfgsmartwatch.models.Data;
 import com.example.tfgsmartwatch.models.DatosClase;
+import com.example.tfgsmartwatch.models.ErrorResponse;
 import com.example.tfgsmartwatch.utils.util;
+import com.google.gson.Gson;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -180,7 +185,7 @@ public class Course extends AppCompatActivity {
                             dayName="viernes";
                             break;
                         case "SATURDAY":
-                            dayName="sábado";
+                            dayName="sabado";
                             break;
                         case "SUNDAY":
                             dayName="domingo";
@@ -300,6 +305,39 @@ public class Course extends AppCompatActivity {
                                     popUpPuntuacion("Tu puntuación ha sido: "+puntuacion);
                                     datosNuevos=saveData(ritmos,movimientos);
                                     datosNuevos.getStudentId();
+
+                                    Call<Data> dataCall=service.postConfigurationData(datosNuevos);
+                                    dataCall.enqueue(new Callback<Data>() {
+                                        @Override
+                                        public void onResponse(Call<Data> call, Response<Data> response) {
+                                            if(response.isSuccessful()){
+
+                                                Toast.makeText(Course.this, "El post se hizo correctamente", Toast.LENGTH_SHORT).show();
+
+                                            }else{
+
+                                                    Toast.makeText(Course.this,"Error:"+response.errorBody().toString(), Toast.LENGTH_SHORT).show();
+                                                    Log.d("mensaje",response.errorBody().toString());
+
+                                            }
+
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<Data> call, Throwable t) {
+                                            if(t instanceof IOException){
+                                                Toast.makeText(Course.this, "Error de conexión", Toast.LENGTH_SHORT).show();
+                                                Log.d("mensaje",t.getMessage());
+                                                t.printStackTrace();
+                                            }else{
+                                                Toast.makeText(Course.this, "Problema de conversión", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(Course.this, "ee: "+t.getMessage(), Toast.LENGTH_SHORT).show();
+                                                Log.d("mensaje",t.getMessage());
+
+                                            }
+
+                                        }
+                                    });
 
                                     //detener();
 
@@ -732,15 +770,17 @@ public class Course extends AppCompatActivity {
         datos.setFecha(formattedString);
         for (int i = 0; i < movimiento.size(); i++) {
             for (int j = 0; j < movimiento.get(i).size(); j++) {
-                if (movimiento.get(i).get(j) > umbral) {
+                if (movimiento.get(i).get(j) >= umbral) {
                     vecesNerviosoMovimiento++;
-                } else {
+                }
+                if(movimiento.get(i).get(j) < umbral){
                     vecesCalmadoMovimiento++;
                 }
 
                 if (ritmo.get(i).get(j).equals("SI")) {
                     vecesCalmadoRitmo++;
-                } else {
+                }
+                if(ritmo.get(i).get(j).equals("NO")){
                     vecesNerviosoRitmo++;
                 }
 
