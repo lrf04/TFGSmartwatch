@@ -241,7 +241,7 @@ public class MenuPrincipal extends AppCompatActivity {
                                         dayName="viernes";
                                         break;
                                     case "SATURDAY":
-                                        dayName="sábado";
+                                        dayName="sabado";
                                         break;
                                     case "SUNDAY":
                                         dayName="domingo";
