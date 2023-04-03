@@ -7,7 +7,6 @@ import com.google.gson.annotations.SerializedName;
 
 
 public class Data {
-
     @SerializedName("configuracion_id")
     @Expose
     private Integer configuracionId;
@@ -65,5 +64,6 @@ public class Data {
     public void setDatosClase(List<DatosClase> datosClase) {
         this.datosClase = datosClase;
     }
+
 
 }

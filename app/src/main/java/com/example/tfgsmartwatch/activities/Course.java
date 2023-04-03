@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -339,7 +340,7 @@ public class Course extends AppCompatActivity {
                                         }
                                     });
 
-                                    //detener();
+                                    detener();
 
                                 }
 
@@ -655,6 +656,8 @@ public class Course extends AppCompatActivity {
 
     public void detener(){
         activo=false;
+        Intent intent = new Intent(Course.this,MenuPrincipal.class);
+        startActivity(intent);
     }
 
 
@@ -785,24 +788,25 @@ public class Course extends AppCompatActivity {
                 }
 
 
-                int periodoId = Integer.parseInt(ejemplo.get(i).get(1));
-                datosClase.setPeriodoId(periodoId);
-                datosClase.setTotalIntervalosMovimiento(movimiento.get(i).size());
-                datosClase.setTotalCalmadoMovimiento(vecesCalmadoMovimiento);
-                datosClase.setTotalNerviosoMovimiento(vecesNerviosoMovimiento);
-
-                datosClase.setTotalIntervalosRitmo(ritmo.get(i).size());
-                datosClase.setTotalCalmadoRitmo(vecesCalmadoRitmo);
-                datosClase.setTotalNerviosoRitmo(vecesNerviosoRitmo);
-
-
-                vecesNerviosoMovimiento = 0;
-                vecesNerviosoMovimiento = 0;
-                vecesCalmadoRitmo = 0;
-                vecesNerviosoRitmo = 0;
-
 
             }
+            int periodoId = Integer.parseInt(ejemplo.get(i).get(1));
+            datosClase.setPeriodoId(periodoId);
+            datosClase.setTotalIntervalosMovimiento(movimiento.get(i).size());
+            datosClase.setTotalCalmadoMovimiento(vecesCalmadoMovimiento);
+            datosClase.setTotalNerviosoMovimiento(vecesNerviosoMovimiento);
+
+            datosClase.setTotalIntervalosRitmo(ritmo.get(i).size());
+            datosClase.setTotalCalmadoRitmo(vecesCalmadoRitmo);
+            datosClase.setTotalNerviosoRitmo(vecesNerviosoRitmo);
+
+
+            vecesCalmadoMovimiento = 0;
+            vecesNerviosoMovimiento = 0;
+            vecesCalmadoRitmo = 0;
+            vecesNerviosoRitmo = 0;
+
+
             listaDatosClase.add(datosClase);
             datosClase = new DatosClase();
 
