@@ -16,18 +16,6 @@ public class ConfigurationStudent {
     @SerializedName("higher_heart_rate")
     @Expose
     private Integer higherHeartRate;
-    @SerializedName("movement_monitoring_time")
-    @Expose
-    private Integer movementMonitoringTime;
-    @SerializedName("movement_percentage")
-    @Expose
-    private Integer movementPercentage;
-    @SerializedName("no_movement_monitoring_time")
-    @Expose
-    private Integer noMovementMonitoringTime;
-    @SerializedName("no_movement_percentage")
-    @Expose
-    private Integer noMovementPercentage;
     @SerializedName("higher_rate")
     @Expose
     private String higherRate;
@@ -55,21 +43,11 @@ public class ConfigurationStudent {
     @SerializedName("no_movement")
     @Expose
     private String noMovement;
-    @SerializedName("proximity")
-    @Expose
-    private Integer proximity;
-    @SerializedName("time")
-    @Expose
-    private Integer time;
+
     @SerializedName("lower_proximity_higher_rate")
     @Expose
     private String lowerProximityHigherRate;
-    @SerializedName("lower_proximity_lower_rate")
-    @Expose
-    private String lowerProximityLowerRate;
-    @SerializedName("higher_proximity_lower_time")
-    @Expose
-    private String higherProximityLowerTime;
+
     @SerializedName("student_id")
     @Expose
     private Integer studentId;
@@ -107,37 +85,7 @@ public class ConfigurationStudent {
         this.higherHeartRate = higherHeartRate;
     }
 
-    public Integer getMovementMonitoringTime() {
-        return movementMonitoringTime;
-    }
 
-    public void setMovementMonitoringTime(Integer movementMonitoringTime) {
-        this.movementMonitoringTime = movementMonitoringTime;
-    }
-
-    public Integer getMovementPercentage() {
-        return movementPercentage;
-    }
-
-    public void setMovementPercentage(Integer movementPercentage) {
-        this.movementPercentage = movementPercentage;
-    }
-
-    public Integer getNoMovementMonitoringTime() {
-        return noMovementMonitoringTime;
-    }
-
-    public void setNoMovementMonitoringTime(Integer noMovementMonitoringTime) {
-        this.noMovementMonitoringTime = noMovementMonitoringTime;
-    }
-
-    public Integer getNoMovementPercentage() {
-        return noMovementPercentage;
-    }
-
-    public void setNoMovementPercentage(Integer noMovementPercentage) {
-        this.noMovementPercentage = noMovementPercentage;
-    }
 
     public String getHigherRate() {
         return higherRate;
@@ -211,21 +159,7 @@ public class ConfigurationStudent {
         this.noMovement = noMovement;
     }
 
-    public Integer getProximity() {
-        return proximity;
-    }
 
-    public void setProximity(Integer proximity) {
-        this.proximity = proximity;
-    }
-
-    public Integer getTime() {
-        return time;
-    }
-
-    public void setTime(Integer time) {
-        this.time = time;
-    }
 
     public String getLowerProximityHigherRate() {
         return lowerProximityHigherRate;
@@ -235,21 +169,9 @@ public class ConfigurationStudent {
         this.lowerProximityHigherRate = lowerProximityHigherRate;
     }
 
-    public String getLowerProximityLowerRate() {
-        return lowerProximityLowerRate;
-    }
 
-    public void setLowerProximityLowerRate(String lowerProximityLowerRate) {
-        this.lowerProximityLowerRate = lowerProximityLowerRate;
-    }
 
-    public String getHigherProximityLowerTime() {
-        return higherProximityLowerTime;
-    }
 
-    public void setHigherProximityLowerTime(String higherProximityLowerTime) {
-        this.higherProximityLowerTime = higherProximityLowerTime;
-    }
 
     public Integer getStudentId() {
         return studentId;

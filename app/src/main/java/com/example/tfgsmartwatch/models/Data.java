@@ -13,6 +13,9 @@ public class Data {
     @SerializedName("datos_clase")
     @Expose
     private List<DatosClase> datosClase;
+    @SerializedName("datos_recreo")
+    @Expose
+    private DatosRecreo datosRecreo;
     @SerializedName("fecha")
     @Expose
     private String fecha;
@@ -64,6 +67,14 @@ public class Data {
     public void setDatosClase(List<DatosClase> datosClase) {
         this.datosClase = datosClase;
     }
+    public DatosRecreo getDatosRecreo() {
+        return datosRecreo;
+    }
+
+    public void setDatosRecreo(DatosRecreo datosRecreo) {
+        this.datosRecreo = datosRecreo;
+    }
+
 
 
 }

@@ -1,9 +1,13 @@
 package com.example.tfgsmartwatch.activities;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +16,11 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -30,19 +39,16 @@ import com.example.tfgsmartwatch.R;
 import com.example.tfgsmartwatch.models.ConfigurationStudent;
 import com.example.tfgsmartwatch.models.Data;
 import com.example.tfgsmartwatch.models.DatosClase;
-import com.example.tfgsmartwatch.models.ErrorResponse;
+import com.example.tfgsmartwatch.models.DatosRecreo;
 import com.example.tfgsmartwatch.utils.util;
-import com.google.gson.Gson;
-
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -55,7 +61,7 @@ public class Course extends AppCompatActivity {
     public int puntuacion,umbral;
     public int higherRateCont,lowerRateCont,higherMovementCont,lowerMovementCont,noMovementCont,higherRateMovementCont,lowerRateMovementCont,higherRateLowerMovementCont,lowerRateHigherMovementCont;
 
-    public boolean activo=false;
+    public boolean activoHilo1 =true,variableFinal=false,activoHilo2=true;
 
     private static final int CODE_GPS = 0, CODE_SENSOR = 1;
 
@@ -79,7 +85,24 @@ public class Course extends AppCompatActivity {
     public ArrayList<ArrayList<String>> ritmos;
     public ArrayList<ArrayList<Integer>> movimientos;
 
+    ArrayList<String> recreoAux=new ArrayList<>();
+
     public int contador=0,contador1=0;
+
+    public int distance = 0;
+    public ArrayList<String> recreoFinal = new ArrayList<>();
+    private SharedPreferences sh;
+    public Boolean variable=false,variableHola=false,variableFin=false;
+    private Sensor stepSensor;
+    private SensorManager stepSensorManager;
+    public int totalSteps =0,previousSteps,currentSteps=0,finalSteps=0;
+    private LocationManager locationManager = null;
+    private LocationListener locationListener = null;
+    public Location currentLocation;
+    public Location previousLocation=new Location("");
+    public int indiceRecreo,indicePeriodoRecreo;
+
+    public int id;
 
 
     SharedPreferences prefs;
@@ -95,6 +118,21 @@ public class Course extends AppCompatActivity {
         if(parametros !=null){
            resultados=getIntent().getExtras().getStringArrayList("resultados");
 
+        }
+        sh = getSharedPreferences("StepPreferences", MODE_PRIVATE);
+
+        previousSteps = Integer.parseInt(sh.getString("stepsFromPreference","0"));
+
+        previousLocation.setLatitude(0.0d);
+        previousLocation.setLongitude(0.0d);
+
+        //Se piden los permisos para el sensor de pasos
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACTIVITY_RECOGNITION},
+                    CODE_SENSOR);
+            // Permission is not granted
         }
 
 
@@ -222,7 +260,7 @@ public class Course extends AppCompatActivity {
         //SharedPreferences
         prefs = getSharedPreferences("Preferences", Context.MODE_PRIVATE);
         String id1= util.getUserIdPrefs(prefs);
-        int id=Integer.parseInt(id1);
+        id=Integer.parseInt(id1);
 
         //Retrofit
         ApiService service= Api.getApi().create(ApiService.class);
@@ -241,10 +279,7 @@ public class Course extends AppCompatActivity {
                     studentId=configuration.getStudentId();
                     higherHeartRate=configuration.getHigherHeartRate();
                     lowerHeartRate=configuration.getLowerHeartRate();
-                    movementTime=configuration.getMovementMonitoringTime();
-                    movementPercentage=configuration.getMovementPercentage();
-                    noMovementTime=configuration.getNoMovementMonitoringTime();
-                    noMovementPercentage=configuration.getNoMovementPercentage();
+
 
                     //Asignación de mensajes
                     higherRateMessage=configuration.getHigherRate();
@@ -254,8 +289,7 @@ public class Course extends AppCompatActivity {
                     higherRateMovementMessage=configuration.getHigherRateMovement();
                     lowerRateMovementMessage=configuration.getLowerRateMovement();
                     noMovementMessage=configuration.getNoMovement();
-                    higherRateLowerMovementMessage=configuration.getHigherRateLowerMovement();
-                    lowerRateHigherMovementMessage=configuration.getLowerRateHigherMovement();
+
 
                 }else{
                     Toast.makeText(Course.this, "El servidor retornó un error", Toast.LENGTH_SHORT).show();
@@ -283,10 +317,10 @@ public class Course extends AppCompatActivity {
 
 
         //Hilo que se repite cada 30 segundos.
-        class Hilo1 extends Thread {
+        /*class Hilo1 extends Thread {
             @Override
             public void run() {
-                while (activo) {
+                while (activoHilo1) {
                     try {
                         Thread.sleep(30000);
                         runOnUiThread(new Runnable() {
@@ -296,81 +330,99 @@ public class Course extends AppCompatActivity {
                                 LocalTime ahora = LocalTime.now();
                                 LocalTime fin = LocalTime.parse(ejemplo.get(indice).get(4));
 
-                                if(indice==(ejemplo.size()-1)){
-                                    variable1=true;
-                                }
+                                if(!ejemplo.get(indice).get(0).equals("recreo")){
+                                    if (indice == (ejemplo.size() - 1)) {
+                                        variable1 = true;
+                                    }
 
-                                //Condicion de finalización
-                                if(variable1 && indice==0){
-                                    //Se debe hacer el popUp y modificar la variable del while del hilo para que pare
-                                    popUpPuntuacion("Tu puntuación ha sido: "+puntuacion);
-                                    datosNuevos=saveData(ritmos,movimientos);
-                                    datosNuevos.getStudentId();
+                                    //Condicion de finalización
+                                    if (variable1 && indice == 0) {
+                                        activoHilo1 = false;
+                                        if (variableFinal) {
+                                            //Se debe hacer el popUp y modificar la variable del while del hilo para que pare
+                                            popUpPuntuacion("Tu puntuación ha sido: " + puntuacion);
+                                            datosNuevos = saveData(ritmos, movimientos);
+                                            datosNuevos.getStudentId();
 
-                                    Call<Data> dataCall=service.postConfigurationData(datosNuevos);
-                                    dataCall.enqueue(new Callback<Data>() {
-                                        @Override
-                                        public void onResponse(Call<Data> call, Response<Data> response) {
-                                            if(response.isSuccessful()){
+                                            Call<Data> dataCall = service.postConfigurationData(datosNuevos);
+                                            dataCall.enqueue(new Callback<Data>() {
+                                                @Override
+                                                public void onResponse(Call<Data> call, Response<Data> response) {
+                                                    if (response.isSuccessful()) {
 
-                                                Toast.makeText(Course.this, "El post se hizo correctamente", Toast.LENGTH_SHORT).show();
+                                                        Toast.makeText(Course.this, "El post se hizo correctamente", Toast.LENGTH_SHORT).show();
+                                                    *//*Intent intent = new Intent(Course.this,MenuPrincipal.class);
+                                                    startActivity(intent);*//*
 
-                                            }else{
+                                                    } else {
 
-                                                    Toast.makeText(Course.this,"Error:"+response.errorBody().toString(), Toast.LENGTH_SHORT).show();
-                                                    Log.d("mensaje",response.errorBody().toString());
+                                                        Toast.makeText(Course.this, "Error:" + response.errorBody().toString(), Toast.LENGTH_SHORT).show();
+                                                        Log.d("mensaje", response.errorBody().toString());
 
-                                            }
+                                                    }
 
+                                                }
+
+                                                @Override
+                                                public void onFailure(Call<Data> call, Throwable t) {
+                                                    if (t instanceof IOException) {
+                                                        Toast.makeText(Course.this, "Error de conexión", Toast.LENGTH_SHORT).show();
+                                                        Log.d("mensaje", t.getMessage());
+                                                        t.printStackTrace();
+                                                    } else {
+                                                        Toast.makeText(Course.this, "Problema de conversión", Toast.LENGTH_SHORT).show();
+                                                        Toast.makeText(Course.this, "ee: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                                        Log.d("mensaje", t.getMessage());
+
+                                                    }
+
+                                                }
+                                            });
                                         }
+                                        variableFinal = true;
 
-                                        @Override
-                                        public void onFailure(Call<Data> call, Throwable t) {
-                                            if(t instanceof IOException){
-                                                Toast.makeText(Course.this, "Error de conexión", Toast.LENGTH_SHORT).show();
-                                                Log.d("mensaje",t.getMessage());
-                                                t.printStackTrace();
-                                            }else{
-                                                Toast.makeText(Course.this, "Problema de conversión", Toast.LENGTH_SHORT).show();
-                                                Toast.makeText(Course.this, "ee: "+t.getMessage(), Toast.LENGTH_SHORT).show();
-                                                Log.d("mensaje",t.getMessage());
+                                    }
 
-                                            }
+                                    *//*contador++;*//*
 
-                                        }
-                                    });
+                                    //Aquí añadimos los datos a los arrays
+                                    double changeInAcceleration1 = changeInAcceleration;
+                                    float currentHeartRate1 = currentHeartRate;
 
-                                    detener();
-
-                                }
-
-                                /*contador++;*/
-
-                                //Aquí añadimos los datos a los arrays
-                                double changeInAcceleration1=changeInAcceleration;
-                                float currentHeartRate1=currentHeartRate;
-
-                                /*if(ejemplo.get(indice).get(1).equals("recreo")){
+                                *//*if(ejemplo.get(indice).get(1).equals("recreo")){
                                     //Cambiar variable para que el hilo pare.
                                     Intent intent=new Intent(Course.this,Recreo.class);
                                     startActivity(intent);
                                     contador=6;
-                                }else{*/
+                                }else{*//*
 
 
-                                    movimientos.get(indice).add((int)changeInAcceleration1);
+                                    movimientos.get(indice).add((int) changeInAcceleration1);
 
-                                    if(currentHeartRate1>lowerHeartRate && currentHeartRate1<higherHeartRate){
+                                    if (currentHeartRate1 > lowerHeartRate && currentHeartRate1 < higherHeartRate) {
                                         ritmos.get(indice).add("SI");
-                                    }else{
+                                    } else {
                                         ritmos.get(indice).add("NO");
                                     }
                                     Toast.makeText(Course.this, "AHORA", Toast.LENGTH_SHORT).show();
 
-                                    situaciones(changeInAcceleration1,currentHeartRate1);
+                                    situaciones(changeInAcceleration1, currentHeartRate1);
+                                }
+                                //Parte del recreo
+                                else{
 
+                                    recreoAux=ejemplo.get(indice);
+                                    activoHilo1=false;
 
-                                /*}*/
+                                    if(variable){
+
+                                        Toast.makeText(Course.this, "Va a empezar recreo", Toast.LENGTH_SHORT).show();
+
+                                        new Hilo2().start();
+                                    }
+                                    variable=true;
+                                }
+                                *//*}*//*
 
                             }
 
@@ -381,6 +433,61 @@ public class Course extends AppCompatActivity {
                 }
             }
         }
+
+        //Hilo recreo
+        class Hilo2 extends Thread {
+            @Override
+            public void run() {
+                while (activoHilo2) {
+                    try {
+                        Thread.sleep(30000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showSteps();
+                                obtenerCoordenadas();
+
+                                if(distance>10){
+                                    recreoFinal.add("SI");
+                                }else{
+                                    recreoFinal.add("NO");
+                                }
+
+                                Toast.makeText(Course.this, "Hilo4", Toast.LENGTH_SHORT).show();
+                                LocalTime ahora = LocalTime.now();
+                                LocalTime fin = LocalTime.parse(recreoAux.get(4));
+
+                                if(ahora.compareTo(fin)>0){
+                                    activoHilo2=false;
+                                    finalSteps=currentSteps;
+
+                                    SharedPreferences.Editor myEdit = sh.edit();
+                                    myEdit.putString("stepsFromPreference", String.valueOf(totalSteps));
+                                    myEdit.commit();
+
+                                    if(variableHola){
+                                        activoHilo1=true;
+                                        variableFin=false;
+                                        Toast.makeText(Course.this, "recreo acabado", Toast.LENGTH_SHORT).show();
+                                        stepSensorManager.unregisterListener(listenerStep);
+                                        new Hilo1().start();
+                                    }
+                                    variableHola=true;
+                                }else{
+                                    Toast.makeText(Course.this, "recreo", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }*/
+
+
+
+
 
 
         /*movementTimeThread=movementTime*60000;*/
@@ -400,6 +507,7 @@ public class Course extends AppCompatActivity {
 
             /*hilo.start();*/
             Thread hilo1=new Thread(new Hilo1(),"hilo1");
+            Thread hilo2=new Thread(new Hilo2(),"hilo2");
 
                 movimientos=new ArrayList<>();
                 ritmos=new ArrayList<>();
@@ -412,13 +520,7 @@ public class Course extends AppCompatActivity {
 
 
             hilo1.start();
-                activo=true;
-            /*try {
-                hilo1.join();
-            } catch (InterruptedException ie) {
-                ie.printStackTrace();
-            }
-            hilo2.start();*/
+
 
 
 
@@ -655,7 +757,7 @@ public class Course extends AppCompatActivity {
     }*/
 
     public void detener(){
-        activo=false;
+        activoHilo1 =false;
         Intent intent = new Intent(Course.this,MenuPrincipal.class);
         startActivity(intent);
     }
@@ -759,9 +861,12 @@ public class Course extends AppCompatActivity {
     public Data saveData(ArrayList<ArrayList<String>> ritmo,ArrayList<ArrayList<Integer>> movimiento) {
         int vecesCalmadoMovimiento = 0, vecesNerviosoMovimiento = 0, vecesCalmadoRitmo = 0, vecesNerviosoRitmo = 0;
         int umbral = 5;
+        int movimientoSi=0,movimientoNo=0;
         ArrayList<DatosClase> listaDatosClase = new ArrayList<>();
+        ArrayList<DatosClase> listaDatosRecreo = new ArrayList<>();
         Data datos = new Data();
         DatosClase datosClase = new DatosClase();
+        DatosRecreo datosRecreo = new DatosRecreo();
 
         LocalDate date = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd LLLL yyyy");
@@ -812,9 +917,375 @@ public class Course extends AppCompatActivity {
 
 
         }
+        for(int i=0;i<recreoFinal.size();i++){
+            if(recreoFinal.get(i).equals("SI")){
+                movimientoSi++;
+            }else{
+                movimientoNo++;
+            }
+        }
+        datosRecreo.setSteps(currentSteps);
+        datosRecreo.setPeriodoId(indicePeriodoRecreo);
+        datosRecreo.setTotalMovimiento(movimientoSi);
+        datosRecreo.setTotalNoMovimiento(movimientoNo);
+
+        listaDatosClase.remove(indiceRecreo);
         datos.setDatosClase(listaDatosClase);
+        datos.setDatosRecreo(datosRecreo);
         return datos;
+    }
+
+    //Hilo recreo
+    /*class Hilo2 extends Thread {
+        @Override
+        public void run() {
+            while (activoHilo2) {
+                try {
+                    Thread.sleep(30000);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showSteps();
+                            obtenerCoordenadas();
+
+                            if(distance>10){
+                                recreoFinal.add("SI");
+                            }else{
+                                recreoFinal.add("NO");
+                            }
+
+                            Toast.makeText(Course.this, "Hilo4", Toast.LENGTH_SHORT).show();
+                            LocalTime ahora = LocalTime.now();
+                            LocalTime fin = LocalTime.parse(recreoAux.get(4));
+
+                            if(ahora.compareTo(fin)>0){
+                                activoHilo2=false;
+                                finalSteps=currentSteps;
+
+                                SharedPreferences.Editor myEdit = sh.edit();
+                                myEdit.putString("stepsFromPreference", String.valueOf(totalSteps));
+                                myEdit.commit();
+
+                                if(variableHola){
+                                    activoHilo1=true;
+                                    variableFin=false;
+                                    Toast.makeText(Course.this, "recreo acabado", Toast.LENGTH_SHORT).show();
+                                    stepSensorManager.unregisterListener(listenerStep);
+                                    new Hilo1().start();
+                                }
+                                variableHola=true;
+                            }else{
+                                Toast.makeText(Course.this, "recreo", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }*/
+
+    private void showSteps() {
+        stepSensorManager = (SensorManager) getSystemService(this.SENSOR_SERVICE);
+
+        stepSensor = stepSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+
+        stepSensorManager.registerListener(listenerStep, stepSensor, SensorManager.SENSOR_DELAY_FASTEST);
+
+    }
+
+    SensorEventListener listenerStep = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent sensorEvent) {
+            totalSteps = (int) sensorEvent.values[0];
+
+            currentSteps=totalSteps-previousSteps;
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int i) {
+
+        }
+    };
+
+    private void obtenerCoordenadas() {
+        locationListener = new Course.MyLocationListener();
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        if (location != null) {
+           /* Toast.makeText(getBaseContext(), "Cambio de localización", Toast.LENGTH_SHORT).show();
+            lat.setText("Longitud funcion:" + location.getLongitude());
+            lon.setText("Latitud funcion:" + location.getLatitude());
+            currentLocation=location;
+
+            textView.setText("Distancia: "+distance);
+            previousLocation=currentLocation;*/
+
+        } else {
+            Toast.makeText(this, "sin localizacion", Toast.LENGTH_SHORT).show();
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
+        }
 
 
+    }
+
+    private class MyLocationListener implements LocationListener {
+        @Override
+        public void onLocationChanged(Location loc) {
+            if (loc != null) {
+                // Toast.makeText(getBaseContext(), "Location changed : Lat: " + loc.getLatitude() + " Lng: " + loc.getLongitude(), Toast.LENGTH_SHORT).show();
+               /* Toast.makeText(Prueba.this, "Cambio de localización", Toast.LENGTH_SHORT).show();
+                lat.setText("Longitud onChange:" + loc.getLongitude());
+                lon.setText("Latitud onChange:" + loc.getLatitude());*/
+
+
+
+                String longitude = "Longitude: " + loc.getLongitude();
+                Log.v(TAG, longitude);
+                String latitude = "Latitude: " + loc.getLatitude();
+                Log.v(TAG, latitude);
+                currentLocation=loc;
+                distance= (int)currentLocation.distanceTo(previousLocation);
+                /*textView.setText("Distancia: "+distance);*/
+                previousLocation=currentLocation;
+               /* lat.setText("Longitud onChange:" + loc.getLongitude());
+                lon.setText("Latitud onChange:" + loc.getLatitude());*/
+
+                /*----------to get City-Name from coordinates ------------- */
+                String cityName = null;
+                Geocoder gcd = new Geocoder(getBaseContext(),
+                        Locale.getDefault());
+                List<Address> addresses;
+                try {
+                    addresses = gcd.getFromLocation(loc.getLatitude(), loc
+                            .getLongitude(), 1);
+                    if (addresses.size() > 0)
+                        System.out.println(addresses.get(0).getLocality());
+                    cityName = addresses.get(0).getLocality();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            /*String s = longitude + "\n" + latitude +
+                    "\n\nMy Currrent City is: " + cityName;
+            textViewCiudad.setText(s);*/
+            } else {
+                if (ActivityCompat.checkSelfPermission(Course.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Course.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 00, locationListener);
+
+            }
+
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            // TODO Auto-generated method stub
+        }
+
+
+        @Override
+        public void onStatusChanged(String provider,
+                                    int status, Bundle extras) {
+            // TODO Auto-generated method stub
+        }
+    }
+
+    class Hilo1 extends Thread {
+        @Override
+        public void run() {
+            while (activoHilo1) {
+                try {
+                    Thread.sleep(30000);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            int indice=getIndice(ejemplo);
+                            LocalTime ahora = LocalTime.now();
+                            LocalTime fin = LocalTime.parse(ejemplo.get(indice).get(4));
+
+                            if(!ejemplo.get(indice).get(0).equals("recreo")){
+                                if (indice == (ejemplo.size() - 1)) {
+                                    variable1 = true;
+                                }
+                                ApiService service= Api.getApi().create(ApiService.class);
+
+                                //Condicion de finalización
+                                if (variable1 && indice == 0){
+                                    activoHilo1 = false;
+                                    if (variableFinal) {
+                                        //Se debe hacer el popUp y modificar la variable del while del hilo para que pare
+                                        popUpPuntuacion("Tu puntuación ha sido: " + puntuacion);
+                                        datosNuevos = saveData(ritmos, movimientos);
+                                        datosNuevos.getStudentId();
+
+                                        Call<Data> dataCall = service.postConfigurationData(datosNuevos);
+                                        dataCall.enqueue(new Callback<Data>() {
+                                            @Override
+                                            public void onResponse(Call<Data> call, Response<Data> response) {
+                                                if (response.isSuccessful()) {
+
+                                                    Toast.makeText(Course.this, "El post se hizo correctamente", Toast.LENGTH_SHORT).show();
+                                                    Intent intent = new Intent(Course.this,MenuPrincipal.class);
+                                                    startActivity(intent);
+
+                                                } else {
+
+                                                    Toast.makeText(Course.this, "Error:" + response.errorBody().toString(), Toast.LENGTH_SHORT).show();
+                                                    Log.d("mensaje", response.errorBody().toString());
+
+                                                }
+
+                                            }
+
+                                            @Override
+                                            public void onFailure(Call<Data> call, Throwable t) {
+                                                if (t instanceof IOException) {
+                                                    Toast.makeText(Course.this, "Error de conexión", Toast.LENGTH_SHORT).show();
+                                                    Log.d("mensaje", t.getMessage());
+                                                    t.printStackTrace();
+                                                } else {
+                                                    Toast.makeText(Course.this, "Problema de conversión", Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(Course.this, "ee: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                                    Log.d("mensaje", t.getMessage());
+
+                                                }
+
+                                            }
+                                        });
+                                    }
+                                    variableFinal = true;
+
+                                }
+
+                                /*contador++;*/
+
+                                //Aquí añadimos los datos a los arrays
+                                double changeInAcceleration1 = changeInAcceleration;
+                                float currentHeartRate1 = currentHeartRate;
+
+                                /*if(ejemplo.get(indice).get(1).equals("recreo")){
+                                    //Cambiar variable para que el hilo pare.
+                                    Intent intent=new Intent(Course.this,Recreo.class);
+                                    startActivity(intent);
+                                    contador=6;
+                                }else{*/
+
+
+                                movimientos.get(indice).add((int) changeInAcceleration1);
+
+                                if (currentHeartRate1 > lowerHeartRate && currentHeartRate1 < higherHeartRate) {
+                                    ritmos.get(indice).add("SI");
+                                } else {
+                                    ritmos.get(indice).add("NO");
+                                }
+                                Toast.makeText(Course.this, "AHORA", Toast.LENGTH_SHORT).show();
+
+                                situaciones(changeInAcceleration1, currentHeartRate1);
+                            }
+                            //Parte del recreo
+                            else{
+                                indiceRecreo=indice;
+                                indicePeriodoRecreo= Integer.parseInt(ejemplo.get(indice).get(1));
+
+                                recreoAux=ejemplo.get(indice);
+                                activoHilo1=false;
+
+                                if(variable){
+
+                                    Toast.makeText(Course.this, "Va a empezar recreo", Toast.LENGTH_SHORT).show();
+
+                                    new Hilo2().start();
+                                }
+                                variable=true;
+                            }
+                            /*}*/
+
+                        }
+
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    //Hilo recreo
+    class Hilo2 extends Thread {
+        @Override
+        public void run() {
+            while (activoHilo2) {
+                try {
+                    Thread.sleep(30000);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showSteps();
+                            obtenerCoordenadas();
+
+                            if(distance>10){
+                                recreoFinal.add("SI");
+                            }else{
+                                recreoFinal.add("NO");
+                            }
+
+                            Toast.makeText(Course.this, "Hilo4", Toast.LENGTH_SHORT).show();
+                            LocalTime ahora = LocalTime.now();
+                            LocalTime fin = LocalTime.parse(recreoAux.get(4));
+
+                            if(ahora.compareTo(fin)>0){
+                                activoHilo2=false;
+                                finalSteps=currentSteps;
+
+                                SharedPreferences.Editor myEdit = sh.edit();
+                                myEdit.putString("stepsFromPreference", String.valueOf(totalSteps));
+                                myEdit.commit();
+
+                                if(variableHola){
+                                    activoHilo1=true;
+                                    variableFin=false;
+                                    Toast.makeText(Course.this, "recreo acabado", Toast.LENGTH_SHORT).show();
+                                    stepSensorManager.unregisterListener(listenerStep);
+                                    new Hilo1().start();
+                                }
+                                variableHola=true;
+                            }else{
+                                Toast.makeText(Course.this, "recreo", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }
