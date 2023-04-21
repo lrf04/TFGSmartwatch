@@ -869,7 +869,7 @@ public class Course extends AppCompatActivity {
         DatosRecreo datosRecreo = new DatosRecreo();
 
         LocalDate date = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd LLLL yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedString = date.format(formatter);
 
         datos.setConfiguracionId(configuracionId);
@@ -1001,6 +1001,7 @@ public class Course extends AppCompatActivity {
             totalSteps = (int) sensorEvent.values[0];
 
             currentSteps=totalSteps-previousSteps;
+            textViewPuntuacion.setText("Pasos: "+currentSteps);
         }
 
         @Override
