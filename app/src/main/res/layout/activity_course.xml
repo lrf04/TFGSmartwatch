@@ -13,8 +13,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:layout_marginBottom="51dp"
         android:textColor="@color/primary_text"
         android:textSize="30dp"
+        app:layout_constraintBottom_toTopOf="@+id/imageView4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -30,7 +32,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/course" />-->
 
-    <TextView
+
+    <!--<TextView
         android:id="@+id/textViewRitmo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -72,7 +75,7 @@
         android:textColor="@color/primary_text"
         app:layout_constraintStart_toStartOf="@+id/textViewCurrent"
         app:layout_constraintTop_toBottomOf="@+id/textViewCurrent" />
-
+-->
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleHorizontal"
@@ -86,10 +89,35 @@
         android:id="@+id/textViewPuntuacion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="TextView"
+        android:textSize="20dp"
+        android:textColor="@color/primary_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progressBar" />
+
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="104dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="39dp"
+        android:src="@drawable/elefante"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/digitalClock"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <!--<TextView
+        android:id="@+id/textViewPuntuacion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="24dp"
         android:text="TextView"
         android:textColor="@color/primary_text"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/textViewPrevious" />
+        app:layout_constraintEnd_toEndOf="@+id/textViewPrevious" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,6 +8,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,6 +29,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -125,6 +127,10 @@ public class Course extends AppCompatActivity {
 
         previousLocation.setLatitude(0.0d);
         previousLocation.setLongitude(0.0d);
+
+        bindUI();
+
+        textViewPuntuacion.setText("Puntuación: "+puntuacion);
 
         //Se piden los permisos para el sensor de pasos
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
@@ -253,7 +259,7 @@ public class Course extends AppCompatActivity {
 
 //***********************************************************************************************************************************
 // ***********************************************************************************************************************************
-        bindUI();
+
 
         /*textViewPuntuacion.setText("Puntuacion= "+puntuacion);*/
 
@@ -604,10 +610,10 @@ public class Course extends AppCompatActivity {
 
 
     private void bindUI(){
-        textViewScore=(TextView) findViewById(R.id.textViewRitmo);
+        /*textViewScore=(TextView) findViewById(R.id.textViewRitmo);
         textViewDifference=(TextView) findViewById(R.id.textViewDifference);
         textViewCurrent=(TextView) findViewById(R.id.textViewCurrent);
-        textViewPrevious=(TextView) findViewById(R.id.textViewPrevious);
+        textViewPrevious=(TextView) findViewById(R.id.textViewPrevious);*/
         textViewPuntuacion=(TextView) findViewById(R.id.textViewPuntuacion);
         pb=(ProgressBar) findViewById(R.id.progressBar);
 
@@ -644,7 +650,7 @@ public class Course extends AppCompatActivity {
                 /*hilo.start();*/
 
             } else {
-                Toast.makeText(Course.this, "PERMISSION FOR HEART RATE SENSOR NOT GRANTED", Toast.LENGTH_LONG).show();
+                //Toast.makeText(Course.this, "PERMISSION FOR HEART RATE SENSOR NOT GRANTED", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -663,7 +669,7 @@ public class Course extends AppCompatActivity {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
             currentHeartRate = sensorEvent.values[0];
-            textViewScore.setText("Actual: "+currentHeartRate);
+            //textViewScore.setText("Actual: "+currentHeartRate);
 
         }
 
@@ -685,10 +691,10 @@ public class Course extends AppCompatActivity {
             changeInAcceleration= Math.abs(accelerationCurrentValue-accelerationPreviousValue);
             accelerationPreviousValue=accelerationCurrentValue;
 
-            textViewDifference.setText("Diferencia= "+(int)changeInAcceleration);
+            /*textViewDifference.setText("Diferencia= "+(int)changeInAcceleration);
             textViewCurrent.setText("Actual= "+(int)accelerationCurrentValue);
             textViewPrevious.setText("Previa= "+(int)accelerationPreviousValue);
-            pb.setProgress((int)changeInAcceleration);
+            pb.setProgress((int)changeInAcceleration);*/
 
 
         }
@@ -794,6 +800,7 @@ public class Course extends AppCompatActivity {
 
             else{
                 puntuacion=puntuacion+1;
+                textViewPuntuacion.setText("Punuación: "+puntuacion);
             }
 
     }
@@ -802,7 +809,8 @@ public class Course extends AppCompatActivity {
 
         View popupView= LayoutInflater.from(getApplicationContext()).inflate(R.layout.popup_validar,null,false);
         final PopupWindow popupWindow=new PopupWindow(popupView,500,800,false);
-        popupWindow.showAtLocation(textViewScore, Gravity.CENTER,0,0);
+
+        popupWindow.showAtLocation(textViewPuntuacion, Gravity.CENTER,0,0);
 
         Vibrator vibrator=(Vibrator)getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(1000);
@@ -821,19 +829,13 @@ public class Course extends AppCompatActivity {
             }
         }, 5000 );//define el tiempo.
 
-        /*popupView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupWindow.dismiss();
-            }
-        });*/
     }
 
     public void popUpPuntuacion(String mensaje){
 
         View popupView= LayoutInflater.from(getApplicationContext()).inflate(R.layout.popup_puntuacion_final,null,false);
         final PopupWindow popupWindow=new PopupWindow(popupView,500,800,false);
-        popupWindow.showAtLocation(textViewScore, Gravity.CENTER,0,0);
+        popupWindow.showAtLocation(textViewPuntuacion, Gravity.CENTER,0,0);
 
         TextView tv=popupView.findViewById(R.id.textViewPopUpPuntuacion);
         tv.setText(mensaje);
@@ -1001,7 +1003,7 @@ public class Course extends AppCompatActivity {
             totalSteps = (int) sensorEvent.values[0];
 
             currentSteps=totalSteps-previousSteps;
-            textViewPuntuacion.setText("Pasos: "+currentSteps);
+            //textViewPuntuacion.setText("Pasos: "+currentSteps);
         }
 
         @Override
